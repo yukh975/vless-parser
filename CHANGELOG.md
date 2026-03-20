@@ -13,6 +13,7 @@
 - Field labels simplified: removed redundant "Inbound" from IP and port labels
 - Field labels horizontally aligned with input fields
 - Hint texts simplified
+- Page title and H1 updated: "VLESS URL → xray-core config.json"
 
 ---
 
