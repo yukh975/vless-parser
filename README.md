@@ -1,16 +1,22 @@
-# VLESS → xray-core config generator
-
-A web tool for generating `config.json` for [xray-core](https://github.com/XTLS/Xray-core) from a VLESS link.
-
-> Русская версия: [README_RU.md](README_RU.md)
+🌐 **English** | [Русский](README_RU.md)
 
 ---
 
-## Description
+# VLESS → xray-core config generator
+
+[![Version](https://img.shields.io/badge/release-v1.0.0-blue)](https://github.com/yukh975/vless-parser/releases)
+[![PHP](https://img.shields.io/badge/PHP-8.1%2B-777bb4)](https://www.php.net)
+[![Nginx](https://img.shields.io/badge/web-Nginx%20%2B%20PHP--FPM-009639)](https://nginx.org)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE.md)
+
+**A web tool for generating `config.json` for [xray-core](https://github.com/XTLS/Xray-core) from a VLESS link.**
 
 Paste a VLESS link, configure the SOCKS5 inbound parameters and routing rules — and get a ready-to-use `config.json` to download or copy.
 
-**Supported transports:**
+---
+
+## Supported transports
+
 - TCP + Reality
 - TCP + TLS
 - XHTTP (SplitHTTP) + Reality / TLS
@@ -18,7 +24,10 @@ Paste a VLESS link, configure the SOCKS5 inbound parameters and routing rules �
 - gRPC + TLS / Reality
 - HTTP/2 + TLS
 
-**Features:**
+---
+
+## Features
+
 - Auto-detection of transport type and security from VLESS URI
 - SOCKS5 inbound with configurable IP and port (default `10808`)
 - Routing section with dynamic rules
@@ -44,7 +53,7 @@ git clone https://github.com/yukh975/vless-parser.git
 cd vless-parser
 ```
 
-Place `.dat` files into the `db/` directory (included in the repository):
+The `db/` directory with geo database files is included in the repository:
 
 ```
 vless-parser/
@@ -129,4 +138,8 @@ Returns the list of available `.dat` files from the `db/` directory.
 
 ## Author
 
-Yuriy Khachaturian (powered by Claude.AI), 2026.
+Yuriy Khachaturian (powered by [Claude.AI](https://claude.ai)), 2026.
+
+---
+
+🌐 **English** | [Русский](README_RU.md)

@@ -1,16 +1,22 @@
-# VLESS → генератор конфига xray-core
-
-Веб-инструмент для генерации `config.json` для [xray-core](https://github.com/XTLS/Xray-core) из VLESS-ссылки.
-
-> English version: [README.md](README.md)
+🌐 [English](README.md) | **Русский**
 
 ---
 
-## Описание
+# VLESS → генератор конфига xray-core
+
+[![Version](https://img.shields.io/badge/release-v1.0.0-blue)](https://github.com/yukh975/vless-parser/releases)
+[![PHP](https://img.shields.io/badge/PHP-8.1%2B-777bb4)](https://www.php.net)
+[![Nginx](https://img.shields.io/badge/web-Nginx%20%2B%20PHP--FPM-009639)](https://nginx.org)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE.md)
+
+**Веб-инструмент для генерации `config.json` для [xray-core](https://github.com/XTLS/Xray-core) из VLESS-ссылки.**
 
 Позволяет вставить VLESS-ссылку, задать параметры SOCKS5 inbound и настроить правила маршрутизации — и получить готовый `config.json`, который можно скачать или скопировать.
 
-**Поддерживаемые транспорты:**
+---
+
+## Поддерживаемые транспорты
+
 - TCP + Reality
 - TCP + TLS
 - XHTTP (SplitHTTP) + Reality / TLS
@@ -18,7 +24,10 @@
 - gRPC + TLS / Reality
 - HTTP/2 + TLS
 
-**Функционал:**
+---
+
+## Функционал
+
 - Автоматическое определение типа транспорта и безопасности из VLESS URI
 - SOCKS5 inbound с настраиваемым IP и портом (по умолчанию `10808`)
 - Секция маршрутизации с динамическими правилами
@@ -44,7 +53,7 @@ git clone https://github.com/yukh975/vless-parser.git
 cd vless-parser
 ```
 
-Положи `.dat` файлы в директорию `db/` (включена в репозиторий):
+Директория `db/` с файлами геобаз включена в репозиторий:
 
 ```
 vless-parser/
@@ -129,4 +138,8 @@ vless-parser/
 
 ## Автор
 
-Yuriy Khachaturian (powered by Claude.AI), 2026.
+Юрий Хачатурян (при поддержке [Claude.AI](https://claude.ai)), 2026.
+
+---
+
+🌐 [English](README.md) | **Русский**
