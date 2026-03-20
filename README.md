@@ -60,8 +60,11 @@ vless-parser/
 └── db/
     ├── geosite.dat
     ├── geoip.dat
-    └── geosite_RU.dat   # optional
+    ├── geosite_RU.dat
+    └── geoip_RU.dat
 ```
+
+All `.dat` files present in the `db/` directory are detected and used automatically.
 
 Configure nginx:
 
