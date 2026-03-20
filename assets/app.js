@@ -207,6 +207,30 @@ function buildValuePicker(ruleType, selectedValues = []) {
     function buildDropdown() {
         dropdown.innerHTML = '';
 
+        // Search input
+        if (presets.length) {
+            const searchWrap = document.createElement('div');
+            searchWrap.className = 'picker-search';
+
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.placeholder = 'Поиск...';
+            searchInput.autocomplete = 'off';
+            searchInput.addEventListener('input', () => {
+                const q = searchInput.value.toLowerCase();
+                dropdown.querySelectorAll('.picker-item').forEach(item => {
+                    const matches = item.textContent.toLowerCase().includes(q);
+                    item.style.display = matches ? '' : 'none';
+                });
+            });
+            // Prevent dropdown close and saveState on search input events
+            searchInput.addEventListener('click', e => e.stopPropagation());
+            searchInput.addEventListener('keydown', e => e.stopPropagation());
+
+            searchWrap.appendChild(searchInput);
+            dropdown.appendChild(searchWrap);
+        }
+
         // Checkboxes for presets
         if (presets.length) {
             presets.forEach(({ value, label }) => {
@@ -308,7 +332,11 @@ function buildValuePicker(ruleType, selectedValues = []) {
         e.stopPropagation();
         const isOpen = !dropdown.classList.contains('hidden');
         document.querySelectorAll('.value-picker-dropdown').forEach(d => d.classList.add('hidden'));
-        if (!isOpen) dropdown.classList.remove('hidden');
+        if (!isOpen) {
+            dropdown.classList.remove('hidden');
+            const si = dropdown.querySelector('.picker-search input');
+            if (si) { si.value = ''; si.focus(); si.dispatchEvent(new Event('input')); }
+        }
     });
 
     document.addEventListener('click', () => dropdown.classList.add('hidden'));

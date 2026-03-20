@@ -346,6 +346,26 @@ button.secondary:hover {
     box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
 
+.picker-search {
+    padding: 2px 2px 4px;
+}
+
+.picker-search input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-size: 12px;
+    padding: 6px 8px;
+    outline: none;
+    font-family: var(--font);
+}
+
+.picker-search input:focus {
+    border-color: var(--accent);
+}
+
 .picker-item {
     display: flex;
     align-items: flex-start;
