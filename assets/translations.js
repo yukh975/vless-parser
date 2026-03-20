@@ -2,9 +2,9 @@ const TRANSLATIONS = {
     en: {
         subtitle:               'Generate <code>config.json</code> for xray-core from a VLESS link',
         inbound_ip_label:       'Inbound IP address',
-        inbound_ip_hint:        'SOCKS5 listen address',
+        inbound_ip_hint:        'SOCKS5 address',
         inbound_port_label:     'Inbound port',
-        inbound_port_hint:      'SOCKS5 proxy port',
+        inbound_port_hint:      'SOCKS5 port',
         vless_link_label:       'VLESS link',
         vless_link_hint:        'Full VLESS link including parameters and name',
         db_section_label:       'Available databases',
@@ -30,9 +30,9 @@ const TRANSLATIONS = {
     ru: {
         subtitle:               'Генерация <code>config.json</code> для xray-core из VLESS-ссылки',
         inbound_ip_label:       'IP-адрес inbound',
-        inbound_ip_hint:        'SOCKS5 адрес',
+        inbound_ip_hint:        'Адрес SOCKS5',
         inbound_port_label:     'Порт inbound',
-        inbound_port_hint:      'Порт SOCKS5-прокси',
+        inbound_port_hint:      'Порт SOCKS5',
         vless_link_label:       'VLESS-ссылка',
         vless_link_hint:        'Полная VLESS-ссылка включая параметры и имя',
         db_section_label:       'Доступные базы данных',
