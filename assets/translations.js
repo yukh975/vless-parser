@@ -37,7 +37,7 @@ const TRANSLATIONS = {
         err_server_status:      'Server error: ',
     },
     ru: {
-        subtitle:               'Генерация <code>config.json</code> для xray-core из VLESS-ссылки',
+        subtitle:               'Генерация <code>config.json</code> для xray-core из VLESS URL',
         inbound_ip_label:       'IP-адрес inbound',
         inbound_ip_hint:        'Адрес SOCKS5',
         inbound_port_label:     'Порт inbound',
