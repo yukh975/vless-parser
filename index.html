@@ -105,6 +105,23 @@
                     <label data-i18n="routing_label"></label>
                     <button type="button" id="add-rule-btn" class="add-btn" data-i18n="add_rule_btn"></button>
                 </div>
+                <div class="field-row" style="margin-bottom:6px">
+                    <div class="field-group">
+                        <label for="default_outbound" data-i18n="default_outbound_label"></label>
+                        <select id="default_outbound">
+                            <option value="proxy">proxy</option>
+                            <option value="direct">direct</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label for="domain_strategy" data-i18n="domain_strategy_label"></label>
+                        <select id="domain_strategy">
+                            <option value="IPIfNonMatch">IPIfNonMatch</option>
+                            <option value="IPOnDemand">IPOnDemand</option>
+                            <option value="AsIs">AsIs</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="hint" style="margin-bottom:6px" data-i18n="routing_hint"></div>
                 <label class="toggle-row">
                     <input type="checkbox" id="block_bittorrent" name="block_bittorrent">

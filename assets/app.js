@@ -89,12 +89,14 @@ function saveState() {
     const state = {
         inbound_ip:       document.getElementById('inbound_ip').value,
         inbound_port:     document.getElementById('inbound_port').value,
-        socks5_auth:      document.getElementById('socks5_auth').checked,
-        socks5_user:      document.getElementById('socks5_user').value,
-        socks5_pass:      document.getElementById('socks5_pass').value,
-        vless_link:       document.getElementById('vless_link').value,
-        block_bittorrent: document.getElementById('block_bittorrent').checked,
-        rules:            collectRules(),
+        socks5_auth:       document.getElementById('socks5_auth').checked,
+        socks5_user:       document.getElementById('socks5_user').value,
+        socks5_pass:       document.getElementById('socks5_pass').value,
+        vless_link:        document.getElementById('vless_link').value,
+        block_bittorrent:  document.getElementById('block_bittorrent').checked,
+        default_outbound:  document.getElementById('default_outbound').value,
+        domain_strategy:   document.getElementById('domain_strategy').value,
+        rules:             collectRules(),
     };
     localStorage.setItem(LS_KEY, JSON.stringify(state));
 }
@@ -515,8 +517,10 @@ addRuleBtn.addEventListener('click', () => {
         document.getElementById('socks5_user').value        = state.socks5_user      ?? '';
         document.getElementById('socks5_pass').value        = state.socks5_pass      ?? '';
         socks5AuthFields.classList.toggle('hidden', !state.socks5_auth);
-        document.getElementById('vless_link').value         = state.vless_link       ?? '';
-        document.getElementById('block_bittorrent').checked = state.block_bittorrent ?? false;
+        document.getElementById('vless_link').value          = state.vless_link       ?? '';
+        document.getElementById('block_bittorrent').checked  = state.block_bittorrent ?? false;
+        document.getElementById('default_outbound').value    = state.default_outbound ?? 'proxy';
+        document.getElementById('domain_strategy').value     = state.domain_strategy  ?? 'IPIfNonMatch';
         autoResize(vlessTextarea);
 
         rulesContainer.innerHTML = '';
@@ -557,8 +561,10 @@ form.addEventListener('submit', async (e) => {
                 socks5_user:      document.getElementById('socks5_user').value.trim(),
                 socks5_pass:      document.getElementById('socks5_pass').value,
                 vless_link:       link,
-                block_bittorrent: document.getElementById('block_bittorrent').checked,
-                routing_rules:    collectRules(),
+                block_bittorrent:  document.getElementById('block_bittorrent').checked,
+                default_outbound:  document.getElementById('default_outbound').value,
+                domain_strategy:   document.getElementById('domain_strategy').value,
+                routing_rules:     collectRules(),
             }),
         });
 
@@ -589,6 +595,8 @@ clearBtn.addEventListener('click', () => {
     document.getElementById('socks5_pass').value        = '';
     socks5AuthFields.classList.add('hidden');
     document.getElementById('block_bittorrent').checked = false;
+    document.getElementById('default_outbound').value   = 'proxy';
+    document.getElementById('domain_strategy').value    = 'IPIfNonMatch';
     loadDefaultRules();
     hideAll();
     localStorage.removeItem(LS_KEY);

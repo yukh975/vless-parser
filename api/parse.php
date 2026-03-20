@@ -24,6 +24,10 @@ $socks5User      = trim((string)($in['socks5_user']      ?? ''));
 $socks5Pass      = (string)($in['socks5_pass']           ?? '');
 $vlessLink       = trim((string)($in['vless_link']       ?? ''));
 $blockBittorrent = (bool)($in['block_bittorrent']        ?? false);
+$defaultOutbound = in_array($in['default_outbound'] ?? '', ['proxy', 'direct'], true)
+    ? $in['default_outbound'] : 'proxy';
+$domainStrategy  = in_array($in['domain_strategy'] ?? '', ['IPIfNonMatch', 'IPOnDemand', 'AsIs'], true)
+    ? $in['domain_strategy'] : 'IPIfNonMatch';
 $routingRules    = is_array($in['routing_rules'] ?? null) ? $in['routing_rules'] : [];
 
 if ($inboundIp === '' || filter_var($inboundIp, FILTER_VALIDATE_IP) === false) {
@@ -39,7 +43,7 @@ if (!str_starts_with($vlessLink, 'vless://')) {
 // --- Parse & build ---------------------------------------------------------
 
 $parsed = parseVless($vlessLink);
-$config = buildConfig($inboundIp, $inboundPort, $parsed, $routingRules, $blockBittorrent, $socks5Auth, $socks5User, $socks5Pass);
+$config = buildConfig($inboundIp, $inboundPort, $parsed, $routingRules, $blockBittorrent, $socks5Auth, $socks5User, $socks5Pass, $defaultOutbound, $domainStrategy);
 
 echo json_encode($config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
@@ -137,7 +141,7 @@ function parseSecurity(string $security, array $q, string $remoteHost): array
 
 // ---------------------------------------------------------------------------
 
-function buildConfig(string $ip, int $port, array $v, array $routingRules, bool $blockBittorrent = false, bool $socks5Auth = false, string $socks5User = '', string $socks5Pass = ''): array
+function buildConfig(string $ip, int $port, array $v, array $routingRules, bool $blockBittorrent = false, bool $socks5Auth = false, string $socks5User = '', string $socks5Pass = '', string $defaultOutbound = 'proxy', string $domainStrategy = 'IPIfNonMatch'): array
 {
     $destOverride = ['http', 'tls'];
     if ($blockBittorrent) {
@@ -196,7 +200,7 @@ function buildConfig(string $ip, int $port, array $v, array $routingRules, bool 
         ],
     ];
 
-    $routing = buildRouting($routingRules, $blockBittorrent);
+    $routing = buildRouting($routingRules, $blockBittorrent, $defaultOutbound, $domainStrategy);
     if ($routing !== null) {
         $config['routing'] = $routing;
     }
@@ -280,7 +284,7 @@ function buildStreamSettings(array $v): array
     return $ss;
 }
 
-function buildRouting(array $rules, bool $blockBittorrent = false): ?array
+function buildRouting(array $rules, bool $blockBittorrent = false, string $defaultOutbound = 'proxy', string $domainStrategy = 'IPIfNonMatch'): ?array
 {
     $xrayRules = [];
 
@@ -290,10 +294,6 @@ function buildRouting(array $rules, bool $blockBittorrent = false): ?array
             'protocol'    => ['bittorrent'],
             'outboundTag' => 'block',
         ];
-    }
-
-    if (empty($rules) && empty($xrayRules)) {
-        return null;
     }
 
     $allowedActions = ['direct', 'proxy', 'block'];
@@ -336,12 +336,15 @@ function buildRouting(array $rules, bool $blockBittorrent = false): ?array
         $xrayRules[] = $xrayRule;
     }
 
-    if (empty($xrayRules)) {
-        return null;
-    }
+    // Catch-all rule for unmatched traffic
+    $xrayRules[] = [
+        'type'        => 'field',
+        'network'     => 'tcp,udp',
+        'outboundTag' => $defaultOutbound,
+    ];
 
     return [
-        'domainStrategy' => 'IPIfNonMatch',
+        'domainStrategy' => $domainStrategy,
         'rules'          => $xrayRules,
     ];
 }
