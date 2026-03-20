@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VLESS → xray config</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>VLESS <span class="arrow">→</span> xray config</h1>
+        <p class="subtitle">Генерация <code>config.json</code> для xray-core из VLESS-ссылки</p>
+
+        <form id="vless-form" novalidate>
+            <div class="field-group">
+                <label for="inbound_ip">IP-адрес inbound</label>
+                <input
+                    type="text"
+                    id="inbound_ip"
+                    name="inbound_ip"
+                    placeholder="0.0.0.0"
+                    value="0.0.0.0"
+                    pattern="^(\d{1,3}\.){3}\d{1,3}$"
+                    required
+                >
+                <span class="hint">IP-адрес, который будет слушать xray</span>
+            </div>
+
+            <div class="field-group">
+                <label for="inbound_port">Порт inbound</label>
+                <input
+                    type="number"
+                    id="inbound_port"
+                    name="inbound_port"
+                    placeholder="1080"
+                    min="1"
+                    max="65535"
+                    required
+                >
+                <span class="hint">Порт SOCKS5-прокси (1–65535)</span>
+            </div>
+
+            <div class="field-group">
+                <label for="vless_link">VLESS-ссылка</label>
+                <textarea
+                    id="vless_link"
+                    name="vless_link"
+                    placeholder="vless://uuid@host:port?security=tls&type=ws&path=/ws#name"
+                    rows="3"
+                    required
+                ></textarea>
+                <span class="hint">Полная VLESS-ссылка включая параметры и имя</span>
+            </div>
+
+            <div class="actions">
+                <button type="submit" id="submit-btn">
+                    <span class="btn-text">Сгенерировать config.json</span>
+                </button>
+                <button type="button" id="clear-btn" class="secondary">Очистить</button>
+            </div>
+        </form>
+
+        <div id="result" class="result hidden">
+            <div class="result-header">
+                <span>config.json</span>
+                <div class="result-actions">
+                    <button id="copy-btn" class="icon-btn" title="Скопировать">⎘ Копировать</button>
+                    <button id="download-btn" class="icon-btn" title="Скачать">↓ Скачать</button>
+                </div>
+            </div>
+            <pre id="result-json"></pre>
+        </div>
+
+        <div id="error" class="error hidden">
+            <span id="error-text"></span>
+        </div>
+    </div>
+
+    <script src="assets/app.js"></script>
+</body>
+</html>
