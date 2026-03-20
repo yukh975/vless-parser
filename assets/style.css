@@ -33,7 +33,7 @@ body {
 
 .container {
     width: 100%;
-    max-width: 640px;
+    max-width: 860px;
     display: flex;
     flex-direction: column;
     gap: 28px;
@@ -257,7 +257,7 @@ button.secondary:hover {
 
 .rule-row {
     display: grid;
-    grid-template-columns: 80px minmax(100px, 160px) 1fr 90px 32px;
+    grid-template-columns: minmax(120px, 180px) 1fr 90px 32px;
     gap: 6px;
     align-items: center;
 }
@@ -387,6 +387,35 @@ button.secondary:hover {
     flex-shrink: 0;
     accent-color: var(--accent);
     cursor: pointer;
+}
+
+.picker-no-result {
+    padding: 4px 2px;
+}
+
+.picker-add-custom {
+    width: 100%;
+    background: transparent;
+    border: 1px dashed var(--accent);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 10px;
+    border-radius: 5px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.picker-add-custom:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+.picker-loading {
+    padding: 12px;
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
 }
 
 .picker-sep {

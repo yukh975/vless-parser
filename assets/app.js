@@ -4,32 +4,19 @@
 
 const DEFAULT_DATABASES = ['geosite.dat', 'geoip.dat'];
 
-// Preset values shown as datalist suggestions in the rule value field
+// Fallback presets if .dat file is unavailable
 const PRESETS = {
-    domain: [
-        { value: 'ru-blocked',                  label: 'ru-blocked — заблокированные в РФ (antifilter + re:filter)' },
-        { value: 'ru-blocked-all',              label: 'ru-blocked-all — все заблокированные в РФ (700k+, осторожно)' },
-        { value: 'ru-available-only-inside',    label: 'ru-available-only-inside — доступно только внутри РФ' },
-        { value: 'antifilter-download',         label: 'antifilter-download — antifilter.download (700k, осторожно)' },
-        { value: 'antifilter-download-community', label: 'antifilter-download-community — community.antifilter.download' },
-        { value: 'refilter',                    label: 'refilter — re:filter' },
-        { value: 'category-ads-all',            label: 'category-ads-all — рекламные домены' },
-        { value: 'win-spy',                     label: 'win-spy — слежка Windows' },
-        { value: 'win-update',                  label: 'win-update — обновления Windows' },
-        { value: 'win-extra',                   label: 'win-extra — прочие домены Windows' },
-        { value: 'ru',                          label: 'ru — российские домены' },
-    ],
-    ip: [
-        { value: 'private', label: 'private — локальные адреса (LAN)' },
-        { value: 'ru',      label: 'ru — российские IP-адреса' },
-    ],
+    domain: ['ru-blocked','ru-blocked-all','ru-available-only-inside',
+             'antifilter-download','antifilter-download-community',
+             'refilter','category-ads-all','win-spy','win-update','win-extra','ru'],
+    ip:     ['private', 'ru'],
 };
 
 const DEFAULT_RULES = [
-    { rule_type: 'ip',     db: 'geoip.dat',  values: ['private'],          action: 'direct' },
-    { rule_type: 'domain', db: 'geosite.dat', values: ['ru'],               action: 'direct' },
-    { rule_type: 'ip',     db: 'geoip.dat',  values: ['ru'],               action: 'direct' },
-    { rule_type: 'domain', db: 'geosite.dat', values: ['category-ads-all'], action: 'block'  },
+    { db: 'geoip.dat',   values: ['private'],          action: 'direct' },
+    { db: 'geosite.dat', values: ['ru'],               action: 'direct' },
+    { db: 'geoip.dat',   values: ['ru'],               action: 'direct' },
+    { db: 'geosite.dat', values: ['category-ads-all'], action: 'block'  },
 ];
 
 // ============================================================
@@ -84,12 +71,9 @@ function loadState() {
         const raw = localStorage.getItem(LS_KEY);
         if (!raw) return null;
         return JSON.parse(raw);
-    } catch {
-        return null;
-    }
+    } catch { return null; }
 }
 
-// Auto-save on any input change
 document.addEventListener('input', saveState);
 document.addEventListener('change', saveState);
 
@@ -116,6 +100,10 @@ function renderDatabases() {
     });
 }
 
+function dbToRuleType(db) {
+    return db.startsWith('geoip') ? 'ip' : 'domain';
+}
+
 function getDbsForType(ruleType) {
     const prefix = ruleType === 'ip' ? 'geoip' : 'geosite';
     return databases.filter(name => name.startsWith(prefix));
@@ -133,13 +121,7 @@ cancelDbBtn.addEventListener('click', () => {
 
 confirmDbBtn.addEventListener('click', () => {
     const name = newDbName.value.trim();
-    if (!name) return;
-
-    if (databases.includes(name)) {
-        newDbName.focus();
-        return;
-    }
-
+    if (!name || databases.includes(name)) { newDbName.focus(); return; }
     databases.push(name);
     renderDatabases();
     renderAllRuleDbSelects();
@@ -154,22 +136,37 @@ newDbName.addEventListener('keydown', (e) => {
 });
 
 // ============================================================
-//  Routing rules
+//  Tag cache
+// ============================================================
+
+const tagCache = {};
+
+async function fetchTags(db) {
+    if (tagCache[db] !== undefined) return tagCache[db];
+    try {
+        const res  = await fetch(`api/tags.php?db=${encodeURIComponent(db)}`);
+        const data = await res.json();
+        tagCache[db] = Array.isArray(data.tags) ? data.tags : [];
+    } catch {
+        tagCache[db] = [];
+    }
+    return tagCache[db];
+}
+
+// ============================================================
+//  DB select builder
 // ============================================================
 
 function buildDbSelect(ruleType, selectedDb) {
-    const dbs = getDbsForType(ruleType);
     const select = document.createElement('select');
     select.className = 'rule-db';
-
-    dbs.forEach(name => {
+    getDbsForType(ruleType).forEach(name => {
         const opt = document.createElement('option');
         opt.value = name;
         opt.textContent = name;
         if (name === selectedDb) opt.selected = true;
         select.appendChild(opt);
     });
-
     return select;
 }
 
@@ -177,20 +174,28 @@ function buildDbSelect(ruleType, selectedDb) {
 //  Multi-select value picker
 // ============================================================
 
-function buildValuePicker(ruleType, selectedValues = []) {
-    const wrapper = document.createElement('div');
+function buildValuePicker(initDb, selectedValues = []) {
+    let knownTags = null;
+    let selected  = new Set(selectedValues);
+
+    const wrapper  = document.createElement('div');
     wrapper.className = 'value-picker';
 
     const trigger = document.createElement('button');
-    trigger.type = 'button';
+    trigger.type  = 'button';
     trigger.className = 'value-picker-trigger';
 
     const dropdown = document.createElement('div');
     dropdown.className = 'value-picker-dropdown hidden';
 
-    const presets = PRESETS[ruleType] ?? [];
-    let selected = new Set(selectedValues);
+    const chipsRow = document.createElement('div');
+    chipsRow.className = 'picker-chips';
+    dropdown.appendChild(chipsRow);
 
+    wrapper.appendChild(trigger);
+    wrapper.appendChild(dropdown);
+
+    // --- Trigger label ---
     function updateTrigger() {
         if (selected.size === 0) {
             trigger.textContent = 'Выбрать...';
@@ -204,180 +209,187 @@ function buildValuePicker(ruleType, selectedValues = []) {
         }
     }
 
-    function buildDropdown() {
-        dropdown.innerHTML = '';
+    // --- Chips (for values not present as checkboxes) ---
+    function addChip(val) {
+        if (chipsRow.querySelector(`[data-val="${CSS.escape(val)}"]`)) return;
+        const chip = document.createElement('span');
+        chip.className  = 'picker-chip';
+        chip.dataset.val = val;
+        chip.innerHTML  = `${val} <button type="button">✕</button>`;
+        chip.querySelector('button').addEventListener('click', () => {
+            selected.delete(val);
+            chip.remove();
+            updateTrigger();
+            saveState();
+        });
+        chipsRow.appendChild(chip);
+    }
 
-        // Search input
-        if (presets.length) {
-            const searchWrap = document.createElement('div');
-            searchWrap.className = 'picker-search';
+    function syncChips() {
+        selected.forEach(val => {
+            const hasCheckbox = !!dropdown.querySelector(`.picker-item[data-value="${CSS.escape(val)}"]`);
+            if (!hasCheckbox) addChip(val);
+        });
+    }
 
-            const searchInput = document.createElement('input');
-            searchInput.type = 'text';
-            searchInput.placeholder = 'Поиск...';
-            searchInput.autocomplete = 'off';
-            searchInput.addEventListener('input', () => {
-                const q = searchInput.value.toLowerCase();
-                dropdown.querySelectorAll('.picker-item').forEach(item => {
-                    const matches = item.textContent.toLowerCase().includes(q);
-                    item.style.display = matches ? '' : 'none';
-                });
+    // --- Render checkboxes + search ---
+    function renderCheckboxes(tags) {
+        dropdown.querySelectorAll('.picker-search, .picker-item, .picker-sep, .picker-loading').forEach(el => el.remove());
+
+        // Search / custom input
+        const searchWrap  = document.createElement('div');
+        searchWrap.className = 'picker-search';
+
+        const searchInput = document.createElement('input');
+        searchInput.type         = 'text';
+        searchInput.placeholder  = 'Поиск или своё значение...';
+        searchInput.autocomplete = 'off';
+
+        const noResult = document.createElement('div');
+        noResult.className = 'picker-no-result hidden';
+
+        function applyFilter() {
+            const q = searchInput.value.trim().toLowerCase();
+            let visible = 0;
+            dropdown.querySelectorAll('.picker-item').forEach(item => {
+                const show = !q || item.dataset.value.includes(q);
+                item.style.display = show ? '' : 'none';
+                if (show) visible++;
             });
-            // Prevent dropdown close and saveState on search input events
-            searchInput.addEventListener('click', e => e.stopPropagation());
-            searchInput.addEventListener('keydown', e => e.stopPropagation());
 
-            searchWrap.appendChild(searchInput);
-            dropdown.appendChild(searchWrap);
+            if (q && visible === 0) {
+                noResult.innerHTML = '';
+                const btn = document.createElement('button');
+                btn.type      = 'button';
+                btn.className = 'picker-add-custom';
+                btn.textContent = `➕ Добавить «${searchInput.value.trim()}»`;
+                btn.addEventListener('click', () => {
+                    const val = searchInput.value.trim();
+                    selected.add(val);
+                    addChip(val);
+                    updateTrigger();
+                    searchInput.value = '';
+                    applyFilter();
+                    saveState();
+                });
+                noResult.appendChild(btn);
+                noResult.classList.remove('hidden');
+            } else {
+                noResult.classList.add('hidden');
+            }
         }
 
-        // Checkboxes for presets
-        if (presets.length) {
-            presets.forEach(({ value, label }) => {
+        searchInput.addEventListener('input', applyFilter);
+        searchInput.addEventListener('click',   e => e.stopPropagation());
+        searchInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const btn = noResult.querySelector('.picker-add-custom');
+                if (btn) btn.click();
+            }
+            e.stopPropagation();
+        });
+
+        searchWrap.appendChild(searchInput);
+        searchWrap.appendChild(noResult);
+        dropdown.insertBefore(searchWrap, chipsRow);
+
+        if (tags.length) {
+            tags.forEach(tag => {
                 const item = document.createElement('label');
-                item.className = 'picker-item';
+                item.className     = 'picker-item';
+                item.dataset.value = tag;
 
                 const cb = document.createElement('input');
-                cb.type = 'checkbox';
-                cb.value = value;
-                cb.checked = selected.has(value);
+                cb.type    = 'checkbox';
+                cb.value   = tag;
+                cb.checked = selected.has(tag);
                 cb.addEventListener('change', () => {
-                    cb.checked ? selected.add(value) : selected.delete(value);
+                    cb.checked ? selected.add(tag) : selected.delete(tag);
                     updateTrigger();
                     saveState();
                 });
 
                 const text = document.createElement('span');
-                text.textContent = label;
+                text.textContent = tag;
 
                 item.appendChild(cb);
                 item.appendChild(text);
-                dropdown.appendChild(item);
+                dropdown.insertBefore(item, chipsRow);
             });
 
             const sep = document.createElement('div');
             sep.className = 'picker-sep';
-            dropdown.appendChild(sep);
+            dropdown.insertBefore(sep, chipsRow);
         }
 
-        // Custom value input
-        const customRow = document.createElement('div');
-        customRow.className = 'picker-custom';
-
-        const customInput = document.createElement('input');
-        customInput.type = 'text';
-        customInput.placeholder = ruleType === 'ip' ? 'напр. 203.0.113.0/24' : 'напр. example.com';
-        customInput.autocomplete = 'off';
-
-        const customBtn = document.createElement('button');
-        customBtn.type = 'button';
-        customBtn.className = 'add-btn';
-        customBtn.textContent = '+';
-
-        function addCustom() {
-            const val = customInput.value.trim();
-            if (!val) return;
-            selected.add(val);
-            updateTrigger();
-            customInput.value = '';
-            // Add chip if not a preset
-            if (!presets.some(p => p.value === val)) {
-                addCustomChip(val);
-            } else {
-                // Check the matching checkbox
-                dropdown.querySelectorAll('.picker-item input').forEach(cb => {
-                    if (cb.value === val) cb.checked = true;
-                });
-            }
-            saveState();
-        }
-
-        customBtn.addEventListener('click', addCustom);
-        customInput.addEventListener('keydown', e => {
-            if (e.key === 'Enter') { e.preventDefault(); addCustom(); }
-        });
-
-        customRow.appendChild(customInput);
-        customRow.appendChild(customBtn);
-        dropdown.appendChild(customRow);
-
-        // Chips for already-selected custom values (not in presets)
-        const chipsRow = document.createElement('div');
-        chipsRow.className = 'picker-chips';
-        dropdown.appendChild(chipsRow);
-
-        function addCustomChip(val) {
-            const chip = document.createElement('span');
-            chip.className = 'picker-chip';
-            chip.innerHTML = `${val} <button type="button">✕</button>`;
-            chip.querySelector('button').addEventListener('click', () => {
-                selected.delete(val);
-                chip.remove();
-                updateTrigger();
-                saveState();
-            });
-            chipsRow.appendChild(chip);
-        }
-
-        // Render existing custom values
-        selected.forEach(val => {
-            if (!presets.some(p => p.value === val)) {
-                addCustomChip(val);
-            }
-        });
+        syncChips();
+        searchInput.value = '';
+        searchInput.focus();
     }
 
-    // Toggle dropdown
+    // --- Open (async load) ---
+    async function openDropdown(currentDb) {
+        dropdown.classList.remove('hidden');
+
+        if (knownTags === null) {
+            const loading = document.createElement('div');
+            loading.className   = 'picker-loading';
+            loading.textContent = 'Загрузка...';
+            dropdown.insertBefore(loading, chipsRow);
+
+            const tags = await fetchTags(currentDb);
+            knownTags = tags.length ? tags : (PRESETS[dbToRuleType(currentDb)] ?? []);
+            renderCheckboxes(knownTags);
+        } else {
+            const si = dropdown.querySelector('.picker-search input');
+            if (si) { si.value = ''; si.focus(); si.dispatchEvent(new Event('input')); }
+        }
+    }
+
+    // --- Toggle ---
     trigger.addEventListener('click', (e) => {
         e.stopPropagation();
         const isOpen = !dropdown.classList.contains('hidden');
         document.querySelectorAll('.value-picker-dropdown').forEach(d => d.classList.add('hidden'));
         if (!isOpen) {
-            dropdown.classList.remove('hidden');
-            const si = dropdown.querySelector('.picker-search input');
-            if (si) { si.value = ''; si.focus(); si.dispatchEvent(new Event('input')); }
+            const currentDb = wrapper.closest('.rule-row')?.querySelector('.rule-db')?.value ?? initDb;
+            openDropdown(currentDb);
         }
     });
 
     document.addEventListener('click', () => dropdown.classList.add('hidden'));
     dropdown.addEventListener('click', e => e.stopPropagation());
 
-    buildDropdown();
     updateTrigger();
 
-    wrapper.appendChild(trigger);
-    wrapper.appendChild(dropdown);
-
-    wrapper.getValues = () => [...selected];
-    wrapper.rebuild = (newType) => {
-        selected = new Set();
-        buildDropdown();
+    wrapper.getValues   = () => [...selected];
+    wrapper.resetPicker = () => {
+        selected  = new Set();
+        knownTags = null;
+        dropdown.querySelectorAll('.picker-search, .picker-item, .picker-sep, .picker-loading').forEach(el => el.remove());
+        chipsRow.innerHTML = '';
         updateTrigger();
     };
 
     return wrapper;
 }
 
-function createRuleRow({ rule_type = 'domain', db = '', values = [], action = 'proxy' } = {}) {
-    // Back-compat: old format stored single `value` string
-    if (!values.length && arguments[0]?.value) {
-        values = [arguments[0].value];
-    }
+// ============================================================
+//  Rule rows
+// ============================================================
+
+function createRuleRow({ db = 'geosite.dat', values = [], action = 'proxy', rule_type, value } = {}) {
+    // Back-compat
+    if (!values.length && value) values = [value];
+    if (!db && rule_type) db = rule_type === 'ip' ? 'geoip.dat' : 'geosite.dat';
 
     const row = document.createElement('div');
     row.className = 'rule-row';
 
-    const typeSelect = document.createElement('select');
-    typeSelect.className = 'rule-type';
-    typeSelect.innerHTML = `
-        <option value="domain" ${rule_type === 'domain' ? 'selected' : ''}>Domain</option>
-        <option value="ip"     ${rule_type === 'ip'     ? 'selected' : ''}>IP</option>
-    `;
+    const dbSelect = buildDbSelect(dbToRuleType(db), db);
 
-    const defaultDb = db || (rule_type === 'ip' ? 'geoip.dat' : 'geosite.dat');
-    const dbSelect = buildDbSelect(rule_type, defaultDb);
-
-    const picker = buildValuePicker(rule_type, values);
+    const picker = buildValuePicker(db, values);
     picker.className += ' rule-values';
 
     const actionSelect = document.createElement('select');
@@ -389,22 +401,14 @@ function createRuleRow({ rule_type = 'domain', db = '', values = [], action = 'p
     `;
 
     const removeBtn = document.createElement('button');
-    removeBtn.type = 'button';
+    removeBtn.type      = 'button';
     removeBtn.className = 'remove-btn';
-    removeBtn.title = 'Удалить';
+    removeBtn.title     = 'Удалить';
     removeBtn.textContent = '✕';
 
-    typeSelect.addEventListener('change', () => {
-        const newType = typeSelect.value;
-        const newDbSelect = buildDbSelect(newType, '');
-        row.replaceChild(newDbSelect, row.querySelector('.rule-db'));
-        picker.rebuild(newType);
-        saveState();
-    });
-
+    dbSelect.addEventListener('change', () => { picker.resetPicker(); saveState(); });
     removeBtn.addEventListener('click', () => { row.remove(); saveState(); });
 
-    row.appendChild(typeSelect);
     row.appendChild(dbSelect);
     row.appendChild(picker);
     row.appendChild(actionSelect);
@@ -415,9 +419,8 @@ function createRuleRow({ rule_type = 'domain', db = '', values = [], action = 'p
 
 function renderAllRuleDbSelects() {
     rulesContainer.querySelectorAll('.rule-row').forEach(row => {
-        const ruleType  = row.querySelector('.rule-type').value;
-        const currentDb = row.querySelector('.rule-db')?.value ?? '';
-        const newDbSel  = buildDbSelect(ruleType, currentDb);
+        const currentDb = row.querySelector('.rule-db')?.value ?? 'geosite.dat';
+        const newDbSel  = buildDbSelect(dbToRuleType(currentDb), currentDb);
         row.replaceChild(newDbSel, row.querySelector('.rule-db'));
     });
 }
@@ -429,13 +432,14 @@ function loadDefaultRules() {
 
 function collectRules() {
     return [...rulesContainer.querySelectorAll('.rule-row')].map(row => {
+        const db     = row.querySelector('.rule-db')?.value ?? 'geosite.dat';
         const picker = row.querySelector('.rule-values');
         const values = picker?.getValues?.() ?? [];
         return {
-            rule_type: row.querySelector('.rule-type').value,
-            db:        row.querySelector('.rule-db')?.value ?? '',
+            rule_type: dbToRuleType(db),
+            db,
             values,
-            action:    row.querySelector('.rule-action').value,
+            action: row.querySelector('.rule-action').value,
         };
     }).filter(r => r.values.length > 0);
 }
@@ -446,7 +450,7 @@ addRuleBtn.addEventListener('click', () => {
 });
 
 // ============================================================
-//  Init: restore from localStorage or load defaults
+//  Init
 // ============================================================
 
 (function init() {
