@@ -284,7 +284,10 @@ function buildValuePicker(initDb, selectedValues = []) {
         dropdown.insertBefore(searchWrap, chipsRow);
 
         if (tags.length) {
-            tags.forEach(tag => {
+            const checked   = [...selected].filter(v => tags.includes(v)).sort();
+            const unchecked = tags.filter(v => !selected.has(v)).sort();
+
+            function makeItem(tag, isChecked) {
                 const item = document.createElement('label');
                 item.className     = 'picker-item';
                 item.dataset.value = tag;
@@ -292,7 +295,7 @@ function buildValuePicker(initDb, selectedValues = []) {
                 const cb = document.createElement('input');
                 cb.type    = 'checkbox';
                 cb.value   = tag;
-                cb.checked = selected.has(tag);
+                cb.checked = isChecked;
                 cb.addEventListener('change', () => {
                     cb.checked ? selected.add(tag) : selected.delete(tag);
                     updateTrigger();
@@ -304,12 +307,22 @@ function buildValuePicker(initDb, selectedValues = []) {
 
                 item.appendChild(cb);
                 item.appendChild(text);
-                dropdown.insertBefore(item, chipsRow);
-            });
+                return item;
+            }
 
-            const sep = document.createElement('div');
-            sep.className = 'picker-sep';
-            dropdown.insertBefore(sep, chipsRow);
+            // Checked first, then separator, then unchecked
+            if (checked.length) {
+                checked.forEach(tag => dropdown.insertBefore(makeItem(tag, true), chipsRow));
+                const sep1 = document.createElement('div');
+                sep1.className = 'picker-sep';
+                dropdown.insertBefore(sep1, chipsRow);
+            }
+
+            unchecked.forEach(tag => dropdown.insertBefore(makeItem(tag, false), chipsRow));
+
+            const sep2 = document.createElement('div');
+            sep2.className = 'picker-sep';
+            dropdown.insertBefore(sep2, chipsRow);
         }
 
         syncChips();
