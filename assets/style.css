@@ -693,6 +693,7 @@ pre#result-json {
     color: var(--accent);
     padding-bottom: 8px;
     border-bottom: 1px solid var(--border);
+    margin-top: 14px;
 }
 
 /* Utility */
