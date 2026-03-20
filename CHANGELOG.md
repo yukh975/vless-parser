@@ -16,6 +16,7 @@
 
 ### Features
 - BitTorrent protocol blocking option added
+- Optional SOCKS5 authentication (username / password)
 - UI language stored in `localStorage`
 
 ### Databases
