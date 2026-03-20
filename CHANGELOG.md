@@ -16,6 +16,8 @@
 ### Features
 - BitTorrent protocol blocking option added
 - Optional SOCKS5 authentication (username / password)
+- Default outbound selector (proxy / direct, default: proxy)
+- Domain strategy selector (IPIfNonMatch / IPOnDemand / AsIs, default: IPIfNonMatch)
 - UI language stored in `localStorage`
 
 ### Databases
