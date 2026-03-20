@@ -102,10 +102,7 @@
             </div>
 
             <!-- Routing -->
-            <div class="section-title">
-                Routing
-                <button type="button" id="add-rule-btn" class="add-btn" data-i18n="add_rule_btn"></button>
-            </div>
+            <div class="section-title">Routing</div>
 
             <div class="section-block">
                 <div class="field-row" style="margin-bottom:6px">
@@ -126,10 +123,13 @@
                     </div>
                 </div>
                 <div class="hint" style="margin-bottom:6px" data-i18n="routing_hint"></div>
-                <label class="toggle-row">
-                    <input type="checkbox" id="block_bittorrent" name="block_bittorrent">
-                    <span class="toggle-label" data-i18n="block_bittorrent_label"></span>
-                </label>
+                <div class="routing-controls">
+                    <label class="toggle-row">
+                        <input type="checkbox" id="block_bittorrent" name="block_bittorrent">
+                        <span class="toggle-label" data-i18n="block_bittorrent_label"></span>
+                    </label>
+                    <button type="button" id="add-rule-btn" class="add-btn" data-i18n="add_rule_btn"></button>
+                </div>
                 <div id="routing-rules">
                     <!-- populated by JS -->
                 </div>

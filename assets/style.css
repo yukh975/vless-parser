@@ -363,6 +363,12 @@ button.secondary:hover {
 
 /* Routing rules */
 
+.routing-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .add-btn {
     background: transparent;
     border: 1px solid var(--accent);
