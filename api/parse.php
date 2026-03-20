@@ -17,9 +17,10 @@ if (!is_array($in)) {
     err('Некорректный JSON в запросе');
 }
 
-$inboundIp   = trim((string)($in['inbound_ip']   ?? ''));
-$inboundPort = (int)($in['inbound_port'] ?? 0);
-$vlessLink   = trim((string)($in['vless_link']   ?? ''));
+$inboundIp    = trim((string)($in['inbound_ip']   ?? ''));
+$inboundPort  = (int)($in['inbound_port'] ?? 0);
+$vlessLink    = trim((string)($in['vless_link']   ?? ''));
+$routingRules = is_array($in['routing_rules'] ?? null) ? $in['routing_rules'] : [];
 
 if ($inboundIp === '') {
     err('Не указан IP-адрес inbound');
@@ -34,7 +35,7 @@ if (!str_starts_with($vlessLink, 'vless://')) {
 // --- Parse & build ---------------------------------------------------------
 
 $parsed = parseVless($vlessLink);
-$config = buildConfig($inboundIp, $inboundPort, $parsed);
+$config = buildConfig($inboundIp, $inboundPort, $parsed, $routingRules);
 
 echo json_encode($config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
@@ -132,7 +133,7 @@ function parseSecurity(string $security, array $q, string $remoteHost): array
 
 // ---------------------------------------------------------------------------
 
-function buildConfig(string $ip, int $port, array $v): array
+function buildConfig(string $ip, int $port, array $v, array $routingRules): array
 {
     $inbound = [
         'tag'      => 'socks-in',
@@ -173,8 +174,8 @@ function buildConfig(string $ip, int $port, array $v): array
         $outbound['_comment'] = $v['name'];
     }
 
-    return [
-        'log' => ['loglevel' => 'warning'],
+    $config = [
+        'log'       => ['loglevel' => 'warning'],
         'inbounds'  => [$inbound],
         'outbounds' => [
             $outbound,
@@ -182,6 +183,13 @@ function buildConfig(string $ip, int $port, array $v): array
             ['tag' => 'block',  'protocol' => 'blackhole'],
         ],
     ];
+
+    $routing = buildRouting($routingRules);
+    if ($routing !== null) {
+        $config['routing'] = $routing;
+    }
+
+    return $config;
 }
 
 function buildStreamSettings(array $v): array
@@ -258,6 +266,45 @@ function buildStreamSettings(array $v): array
     }
 
     return $ss;
+}
+
+function buildRouting(array $rules): ?array
+{
+    if (empty($rules)) {
+        return null;
+    }
+
+    $xrayRules = [];
+    $allowedActions = ['direct', 'proxy', 'block'];
+
+    foreach ($rules as $rule) {
+        $type   = $rule['rule_type'] ?? '';
+        $value  = trim((string)($rule['value'] ?? ''));
+        $action = $rule['action'] ?? 'proxy';
+
+        if ($value === '' || !in_array($type, ['ip', 'domain'], true) || !in_array($action, $allowedActions, true)) {
+            continue;
+        }
+
+        $xrayRule = ['type' => 'field', 'outboundTag' => $action];
+
+        if ($type === 'ip') {
+            $xrayRule['ip'] = [$value];
+        } else {
+            $xrayRule['domain'] = [$value];
+        }
+
+        $xrayRules[] = $xrayRule;
+    }
+
+    if (empty($xrayRules)) {
+        return null;
+    }
+
+    return [
+        'domainStrategy' => 'IPIfNonMatch',
+        'rules'          => $xrayRules,
+    ];
 }
 
 function isValidUuid(string $uuid): bool

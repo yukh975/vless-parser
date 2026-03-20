@@ -53,6 +53,19 @@
                 <span class="hint">Полная VLESS-ссылка включая параметры и имя</span>
             </div>
 
+            <!-- Routing rules -->
+            <div class="routing-section">
+                <div class="routing-header">
+                    <label>Правила маршрутизации</label>
+                    <button type="button" id="add-rule-btn" class="add-btn">+ Добавить</button>
+                </div>
+                <div class="routing-hint">Правила применяются сверху вниз. Последнее правило — fallback.</div>
+
+                <div id="routing-rules">
+                    <!-- populated by JS -->
+                </div>
+            </div>
+
             <div class="actions">
                 <button type="submit" id="submit-btn">
                     <span class="btn-text">Сгенерировать config.json</span>
