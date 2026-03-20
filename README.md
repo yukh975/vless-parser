@@ -70,8 +70,13 @@ Configure nginx:
 
 ```nginx
 server {
-    listen 80;
-    root /path/to/vless-parser;
+    listen 443 ssl;
+    server_name your.domain.com;
+
+    ssl_certificate     /etc/ssl/certs/your.domain.com.crt;
+    ssl_certificate_key /etc/ssl/private/your.domain.com.key;
+
+    root  /path/to/vless-parser;
     index index.html;
 
     location /api/ {
