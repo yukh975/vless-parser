@@ -11,6 +11,8 @@
 - Named section titles: Inbound, VLESS, Databases, Routing, Logging
 - Uniform vertical spacing between all form sections
 - Field labels simplified: removed redundant "Inbound" from IP and port labels
+- Field labels horizontally aligned with input fields
+- Hint texts simplified
 
 ---
 
