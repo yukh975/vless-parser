@@ -104,10 +104,6 @@ function dbToRuleType(db) {
     return db.startsWith('geoip') ? 'ip' : 'domain';
 }
 
-function getDbsForType(ruleType) {
-    const prefix = ruleType === 'ip' ? 'geoip' : 'geosite';
-    return databases.filter(name => name.startsWith(prefix));
-}
 
 addDbBtn.addEventListener('click', () => {
     addDbForm.classList.toggle('hidden');
@@ -157,10 +153,10 @@ async function fetchTags(db) {
 //  DB select builder
 // ============================================================
 
-function buildDbSelect(ruleType, selectedDb) {
+function buildDbSelect(selectedDb) {
     const select = document.createElement('select');
     select.className = 'rule-db';
-    getDbsForType(ruleType).forEach(name => {
+    databases.forEach(name => {
         const opt = document.createElement('option');
         opt.value = name;
         opt.textContent = name;
@@ -387,7 +383,7 @@ function createRuleRow({ db = 'geosite.dat', values = [], action = 'proxy', rule
     const row = document.createElement('div');
     row.className = 'rule-row';
 
-    const dbSelect = buildDbSelect(dbToRuleType(db), db);
+    const dbSelect = buildDbSelect(db);
 
     const picker = buildValuePicker(db, values);
     picker.className += ' rule-values';
@@ -420,7 +416,7 @@ function createRuleRow({ db = 'geosite.dat', values = [], action = 'proxy', rule
 function renderAllRuleDbSelects() {
     rulesContainer.querySelectorAll('.rule-row').forEach(row => {
         const currentDb = row.querySelector('.rule-db')?.value ?? 'geosite.dat';
-        const newDbSel  = buildDbSelect(dbToRuleType(currentDb), currentDb);
+        const newDbSel  = buildDbSelect(currentDb);
         row.replaceChild(newDbSel, row.querySelector('.rule-db'));
     });
 }
