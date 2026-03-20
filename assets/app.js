@@ -287,7 +287,9 @@ addRuleBtn.addEventListener('click', () => {
         document.getElementById('inbound_port').value = state.inbound_port ?? '10808';
         document.getElementById('vless_link').value   = state.vless_link   ?? '';
 
-        databases = Array.isArray(state.databases) ? state.databases : [...DEFAULT_DATABASES];
+        databases = Array.isArray(state.databases)
+            ? state.databases.map(db => typeof db === 'object' ? db.name : db)
+            : [...DEFAULT_DATABASES];
         renderDatabases();
 
         rulesContainer.innerHTML = '';
