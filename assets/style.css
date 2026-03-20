@@ -210,7 +210,7 @@ textarea:invalid:not(:placeholder-shown) {
 .actions {
     display: flex;
     gap: 10px;
-    padding-top: 4px;
+    padding-top: 16px;
 }
 
 button {
