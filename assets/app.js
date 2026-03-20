@@ -4,6 +4,27 @@
 
 const DEFAULT_DATABASES = ['geosite.dat', 'geoip.dat'];
 
+// Preset values shown as datalist suggestions in the rule value field
+const PRESETS = {
+    domain: [
+        { value: 'ru-blocked',                  label: 'ru-blocked — заблокированные в РФ (antifilter + re:filter)' },
+        { value: 'ru-blocked-all',              label: 'ru-blocked-all — все заблокированные в РФ (700k+, осторожно)' },
+        { value: 'ru-available-only-inside',    label: 'ru-available-only-inside — доступно только внутри РФ' },
+        { value: 'antifilter-download',         label: 'antifilter-download — antifilter.download (700k, осторожно)' },
+        { value: 'antifilter-download-community', label: 'antifilter-download-community — community.antifilter.download' },
+        { value: 'refilter',                    label: 'refilter — re:filter' },
+        { value: 'category-ads-all',            label: 'category-ads-all — рекламные домены' },
+        { value: 'win-spy',                     label: 'win-spy — слежка Windows' },
+        { value: 'win-update',                  label: 'win-update — обновления Windows' },
+        { value: 'win-extra',                   label: 'win-extra — прочие домены Windows' },
+        { value: 'ru',                          label: 'ru — российские домены' },
+    ],
+    ip: [
+        { value: 'private', label: 'private — локальные адреса (LAN)' },
+        { value: 'ru',      label: 'ru — российские IP-адреса' },
+    ],
+};
+
 const DEFAULT_RULES = [
     { rule_type: 'ip',     db: 'geoip.dat',   value: 'private',            action: 'direct' },
     { rule_type: 'domain', db: 'geosite.dat',  value: 'ru',                 action: 'direct' },
@@ -152,6 +173,23 @@ function buildDbSelect(ruleType, selectedDb) {
     return select;
 }
 
+function buildDatalist(ruleType) {
+    const listId = `presets-${ruleType}`;
+    // Reuse existing datalist if already in DOM
+    if (!document.getElementById(listId)) {
+        const dl = document.createElement('datalist');
+        dl.id = listId;
+        (PRESETS[ruleType] ?? []).forEach(({ value, label }) => {
+            const opt = document.createElement('option');
+            opt.value = value;
+            opt.label = label;
+            dl.appendChild(opt);
+        });
+        document.body.appendChild(dl);
+    }
+    return listId;
+}
+
 function createRuleRow({ rule_type = 'domain', db = '', value = '', action = 'proxy' } = {}) {
     const row = document.createElement('div');
     row.className = 'rule-row';
@@ -163,7 +201,6 @@ function createRuleRow({ rule_type = 'domain', db = '', value = '', action = 'pr
         <option value="ip"     ${rule_type === 'ip'     ? 'selected' : ''}>IP</option>
     `;
 
-    // Default DB for this type if not specified
     const defaultDb = db || (rule_type === 'ip' ? 'geoip.dat' : 'geosite.dat');
     const dbSelect = buildDbSelect(rule_type, defaultDb);
 
@@ -172,6 +209,8 @@ function createRuleRow({ rule_type = 'domain', db = '', value = '', action = 'pr
     valueInput.className = 'rule-value';
     valueInput.placeholder = rule_type === 'ip' ? 'ru / 10.0.0.0/8' : 'ru / category-ads-all';
     valueInput.value = value;
+    valueInput.setAttribute('list', buildDatalist(rule_type));
+    valueInput.autocomplete = 'off';
 
     const actionSelect = document.createElement('select');
     actionSelect.className = 'rule-action';
@@ -187,12 +226,13 @@ function createRuleRow({ rule_type = 'domain', db = '', value = '', action = 'pr
     removeBtn.title = 'Удалить';
     removeBtn.textContent = '✕';
 
-    // When rule type changes — rebuild DB select
+    // When rule type changes — rebuild DB select and switch datalist
     typeSelect.addEventListener('change', () => {
         const newType = typeSelect.value;
         const newDbSelect = buildDbSelect(newType, '');
         row.replaceChild(newDbSelect, row.querySelector('.rule-db'));
         valueInput.placeholder = newType === 'ip' ? 'ru / 10.0.0.0/8' : 'ru / category-ads-all';
+        valueInput.setAttribute('list', buildDatalist(newType));
         saveState();
     });
 
