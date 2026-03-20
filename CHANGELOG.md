@@ -12,12 +12,14 @@
 - EN / RU language switcher added (default: English)
 - Version number displayed in page footer
 - Hint text unified: "SOCKS5 address" / "SOCKS5 port"
+- Named section titles added: Inbound, VLESS, Databases, Routing, Logging
 
 ### Features
 - BitTorrent protocol blocking option added
 - Optional SOCKS5 authentication (username / password)
 - Default outbound selector (proxy / direct, default: proxy)
 - Domain strategy selector (IPIfNonMatch / IPOnDemand / AsIs, default: IPIfNonMatch)
+- Logging section: enable toggle, log directory, log level (debug / info / warning / error / none)
 - UI language stored in `localStorage`
 
 ### Databases
