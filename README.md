@@ -2,9 +2,9 @@
 
 ---
 
-# VLESS → xray-core config generator v1.0.0
+# VLESS → xray-core config generator v1.0.1
 
-[![Version](https://img.shields.io/badge/release-v1.0.0-blue)](https://github.com/yukh975/vless-parser/releases)
+[![Version](https://img.shields.io/badge/release-v1.0.1-blue)](https://github.com/yukh975/vless-parser/releases)
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777bb4)](https://www.php.net)
 [![Nginx](https://img.shields.io/badge/web-Nginx%20%2B%20PHP--FPM-009639)](https://nginx.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE.md)
