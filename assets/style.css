@@ -162,7 +162,7 @@ label {
 }
 
 .field-group > label {
-    padding-left: 1px;
+    padding-left: 3px;
 }
 
 input[type="text"],
