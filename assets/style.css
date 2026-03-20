@@ -676,24 +676,17 @@ pre#result-json {
     font-size: 14px;
 }
 
-/* Section title with trailing line */
+/* Section title with underline */
 
 .section-title {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: var(--muted);
-}
-
-.section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
 }
 
 /* Utility */
