@@ -279,21 +279,34 @@ function buildRouting(array $rules): ?array
 
     foreach ($rules as $rule) {
         $type   = $rule['rule_type'] ?? '';
-        $value  = trim((string)($rule['value'] ?? ''));
-        $db     = trim((string)($rule['db']    ?? ''));
+        $db     = trim((string)($rule['db'] ?? ''));
         $action = $rule['action'] ?? 'proxy';
 
-        if ($value === '' || !in_array($type, ['ip', 'domain'], true) || !in_array($action, $allowedActions, true)) {
+        // Support both new `values` array and legacy `value` string
+        $rawValues = [];
+        if (!empty($rule['values']) && is_array($rule['values'])) {
+            $rawValues = $rule['values'];
+        } elseif (!empty($rule['value'])) {
+            $rawValues = [trim((string)$rule['value'])];
+        }
+
+        if (empty($rawValues) || !in_array($type, ['ip', 'domain'], true) || !in_array($action, $allowedActions, true)) {
             continue;
         }
 
-        $xrayRule = ['type' => 'field', 'outboundTag' => $action];
         $prefix   = $type === 'ip' ? 'geoip' : 'geosite';
+        $formatted = array_values(array_filter(array_map(
+            fn($v) => formatGeoValue(trim((string)$v), $prefix, $db),
+            $rawValues
+        )));
 
+        if (empty($formatted)) continue;
+
+        $xrayRule = ['type' => 'field', 'outboundTag' => $action];
         if ($type === 'ip') {
-            $xrayRule['ip'] = [formatGeoValue($value, $prefix, $db)];
+            $xrayRule['ip'] = $formatted;
         } else {
-            $xrayRule['domain'] = [formatGeoValue($value, $prefix, $db)];
+            $xrayRule['domain'] = $formatted;
         }
 
         $xrayRules[] = $xrayRule;

@@ -289,6 +289,154 @@ button.secondary:hover {
     color: var(--error);
 }
 
+/* Value picker */
+
+.value-picker {
+    position: relative;
+}
+
+.value-picker-trigger {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+    padding: 8px 28px 8px 10px;
+    text-align: left;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+    transition: border-color 0.15s;
+}
+
+.value-picker-trigger::after {
+    content: '▾';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+}
+
+.value-picker-trigger.empty {
+    color: var(--muted);
+}
+
+.value-picker-trigger:hover {
+    border-color: var(--accent);
+}
+
+.value-picker-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 100;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px;
+    min-width: 280px;
+    max-height: 320px;
+    overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.picker-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--text);
+}
+
+.picker-item:hover {
+    background: var(--border);
+}
+
+.picker-item input[type="checkbox"] {
+    margin-top: 2px;
+    flex-shrink: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.picker-sep {
+    height: 1px;
+    background: var(--border);
+    margin: 6px 0;
+}
+
+.picker-custom {
+    display: flex;
+    gap: 6px;
+    padding: 4px 2px;
+}
+
+.picker-custom input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-size: 12px;
+    padding: 5px 8px;
+    outline: none;
+    font-family: var(--mono);
+}
+
+.picker-custom input:focus {
+    border-color: var(--accent);
+}
+
+.picker-custom .add-btn {
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+.picker-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px 2px 2px;
+}
+
+.picker-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: var(--mono);
+    padding: 2px 4px 2px 7px;
+    color: var(--text);
+}
+
+.picker-chip button {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 11px;
+    padding: 0;
+    width: 14px;
+    height: 14px;
+    line-height: 1;
+    border-radius: 2px;
+}
+
+.picker-chip button:hover {
+    color: var(--error);
+}
+
 /* Result */
 
 .result {

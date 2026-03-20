@@ -26,10 +26,10 @@ const PRESETS = {
 };
 
 const DEFAULT_RULES = [
-    { rule_type: 'ip',     db: 'geoip.dat',   value: 'private',            action: 'direct' },
-    { rule_type: 'domain', db: 'geosite.dat',  value: 'ru',                 action: 'direct' },
-    { rule_type: 'ip',     db: 'geoip.dat',   value: 'ru',                 action: 'direct' },
-    { rule_type: 'domain', db: 'geosite.dat',  value: 'category-ads-all',   action: 'block'  },
+    { rule_type: 'ip',     db: 'geoip.dat',  values: ['private'],          action: 'direct' },
+    { rule_type: 'domain', db: 'geosite.dat', values: ['ru'],               action: 'direct' },
+    { rule_type: 'ip',     db: 'geoip.dat',  values: ['ru'],               action: 'direct' },
+    { rule_type: 'domain', db: 'geosite.dat', values: ['category-ads-all'], action: 'block'  },
 ];
 
 // ============================================================
@@ -173,24 +173,169 @@ function buildDbSelect(ruleType, selectedDb) {
     return select;
 }
 
-function buildDatalist(ruleType) {
-    const listId = `presets-${ruleType}`;
-    // Reuse existing datalist if already in DOM
-    if (!document.getElementById(listId)) {
-        const dl = document.createElement('datalist');
-        dl.id = listId;
-        (PRESETS[ruleType] ?? []).forEach(({ value, label }) => {
-            const opt = document.createElement('option');
-            opt.value = value;
-            opt.label = label;
-            dl.appendChild(opt);
-        });
-        document.body.appendChild(dl);
+// ============================================================
+//  Multi-select value picker
+// ============================================================
+
+function buildValuePicker(ruleType, selectedValues = []) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'value-picker';
+
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'value-picker-trigger';
+
+    const dropdown = document.createElement('div');
+    dropdown.className = 'value-picker-dropdown hidden';
+
+    const presets = PRESETS[ruleType] ?? [];
+    let selected = new Set(selectedValues);
+
+    function updateTrigger() {
+        if (selected.size === 0) {
+            trigger.textContent = 'Выбрать...';
+            trigger.classList.add('empty');
+        } else if (selected.size === 1) {
+            trigger.textContent = [...selected][0];
+            trigger.classList.remove('empty');
+        } else {
+            trigger.textContent = `${selected.size} выбрано`;
+            trigger.classList.remove('empty');
+        }
     }
-    return listId;
+
+    function buildDropdown() {
+        dropdown.innerHTML = '';
+
+        // Checkboxes for presets
+        if (presets.length) {
+            presets.forEach(({ value, label }) => {
+                const item = document.createElement('label');
+                item.className = 'picker-item';
+
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.value = value;
+                cb.checked = selected.has(value);
+                cb.addEventListener('change', () => {
+                    cb.checked ? selected.add(value) : selected.delete(value);
+                    updateTrigger();
+                    saveState();
+                });
+
+                const text = document.createElement('span');
+                text.textContent = label;
+
+                item.appendChild(cb);
+                item.appendChild(text);
+                dropdown.appendChild(item);
+            });
+
+            const sep = document.createElement('div');
+            sep.className = 'picker-sep';
+            dropdown.appendChild(sep);
+        }
+
+        // Custom value input
+        const customRow = document.createElement('div');
+        customRow.className = 'picker-custom';
+
+        const customInput = document.createElement('input');
+        customInput.type = 'text';
+        customInput.placeholder = ruleType === 'ip' ? 'напр. 203.0.113.0/24' : 'напр. example.com';
+        customInput.autocomplete = 'off';
+
+        const customBtn = document.createElement('button');
+        customBtn.type = 'button';
+        customBtn.className = 'add-btn';
+        customBtn.textContent = '+';
+
+        function addCustom() {
+            const val = customInput.value.trim();
+            if (!val) return;
+            selected.add(val);
+            updateTrigger();
+            customInput.value = '';
+            // Add chip if not a preset
+            if (!presets.some(p => p.value === val)) {
+                addCustomChip(val);
+            } else {
+                // Check the matching checkbox
+                dropdown.querySelectorAll('.picker-item input').forEach(cb => {
+                    if (cb.value === val) cb.checked = true;
+                });
+            }
+            saveState();
+        }
+
+        customBtn.addEventListener('click', addCustom);
+        customInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); addCustom(); }
+        });
+
+        customRow.appendChild(customInput);
+        customRow.appendChild(customBtn);
+        dropdown.appendChild(customRow);
+
+        // Chips for already-selected custom values (not in presets)
+        const chipsRow = document.createElement('div');
+        chipsRow.className = 'picker-chips';
+        dropdown.appendChild(chipsRow);
+
+        function addCustomChip(val) {
+            const chip = document.createElement('span');
+            chip.className = 'picker-chip';
+            chip.innerHTML = `${val} <button type="button">✕</button>`;
+            chip.querySelector('button').addEventListener('click', () => {
+                selected.delete(val);
+                chip.remove();
+                updateTrigger();
+                saveState();
+            });
+            chipsRow.appendChild(chip);
+        }
+
+        // Render existing custom values
+        selected.forEach(val => {
+            if (!presets.some(p => p.value === val)) {
+                addCustomChip(val);
+            }
+        });
+    }
+
+    // Toggle dropdown
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = !dropdown.classList.contains('hidden');
+        document.querySelectorAll('.value-picker-dropdown').forEach(d => d.classList.add('hidden'));
+        if (!isOpen) dropdown.classList.remove('hidden');
+    });
+
+    document.addEventListener('click', () => dropdown.classList.add('hidden'));
+    dropdown.addEventListener('click', e => e.stopPropagation());
+
+    buildDropdown();
+    updateTrigger();
+
+    wrapper.appendChild(trigger);
+    wrapper.appendChild(dropdown);
+
+    wrapper.getValues = () => [...selected];
+    wrapper.rebuild = (newType) => {
+        selected = new Set();
+        buildDropdown();
+        updateTrigger();
+    };
+
+    return wrapper;
 }
 
-function createRuleRow({ rule_type = 'domain', db = '', value = '', action = 'proxy' } = {}) {
+function createRuleRow({ rule_type = 'domain', db = '', values = [], action = 'proxy' } = {}) {
+    // Back-compat: old format stored single `value` string
+    if (!values.length && arguments[0]?.value) {
+        values = [arguments[0].value];
+    }
+
     const row = document.createElement('div');
     row.className = 'rule-row';
 
@@ -204,13 +349,8 @@ function createRuleRow({ rule_type = 'domain', db = '', value = '', action = 'pr
     const defaultDb = db || (rule_type === 'ip' ? 'geoip.dat' : 'geosite.dat');
     const dbSelect = buildDbSelect(rule_type, defaultDb);
 
-    const valueInput = document.createElement('input');
-    valueInput.type = 'text';
-    valueInput.className = 'rule-value';
-    valueInput.placeholder = rule_type === 'ip' ? 'ru / 10.0.0.0/8' : 'ru / category-ads-all';
-    valueInput.value = value;
-    valueInput.setAttribute('list', buildDatalist(rule_type));
-    valueInput.autocomplete = 'off';
+    const picker = buildValuePicker(rule_type, values);
+    picker.className += ' rule-values';
 
     const actionSelect = document.createElement('select');
     actionSelect.className = 'rule-action';
@@ -226,13 +366,11 @@ function createRuleRow({ rule_type = 'domain', db = '', value = '', action = 'pr
     removeBtn.title = 'Удалить';
     removeBtn.textContent = '✕';
 
-    // When rule type changes — rebuild DB select and switch datalist
     typeSelect.addEventListener('change', () => {
         const newType = typeSelect.value;
         const newDbSelect = buildDbSelect(newType, '');
         row.replaceChild(newDbSelect, row.querySelector('.rule-db'));
-        valueInput.placeholder = newType === 'ip' ? 'ru / 10.0.0.0/8' : 'ru / category-ads-all';
-        valueInput.setAttribute('list', buildDatalist(newType));
+        picker.rebuild(newType);
         saveState();
     });
 
@@ -240,7 +378,7 @@ function createRuleRow({ rule_type = 'domain', db = '', value = '', action = 'pr
 
     row.appendChild(typeSelect);
     row.appendChild(dbSelect);
-    row.appendChild(valueInput);
+    row.appendChild(picker);
     row.appendChild(actionSelect);
     row.appendChild(removeBtn);
 
@@ -262,12 +400,16 @@ function loadDefaultRules() {
 }
 
 function collectRules() {
-    return [...rulesContainer.querySelectorAll('.rule-row')].map(row => ({
-        rule_type: row.querySelector('.rule-type').value,
-        db:        row.querySelector('.rule-db')?.value ?? '',
-        value:     row.querySelector('.rule-value').value.trim(),
-        action:    row.querySelector('.rule-action').value,
-    })).filter(r => r.value !== '');
+    return [...rulesContainer.querySelectorAll('.rule-row')].map(row => {
+        const picker = row.querySelector('.rule-values');
+        const values = picker?.getValues?.() ?? [];
+        return {
+            rule_type: row.querySelector('.rule-type').value,
+            db:        row.querySelector('.rule-db')?.value ?? '',
+            values,
+            action:    row.querySelector('.rule-action').value,
+        };
+    }).filter(r => r.values.length > 0);
 }
 
 addRuleBtn.addEventListener('click', () => {
