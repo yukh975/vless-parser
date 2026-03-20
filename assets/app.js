@@ -65,6 +65,19 @@ document.addEventListener('input', saveState);
 document.addEventListener('change', saveState);
 
 // ============================================================
+//  Auto-resize textarea
+// ============================================================
+
+const vlessTextarea = document.getElementById('vless_link');
+
+function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+}
+
+vlessTextarea.addEventListener('input', () => autoResize(vlessTextarea));
+
+// ============================================================
 //  Database manager
 // ============================================================
 
@@ -441,10 +454,11 @@ addRuleBtn.addEventListener('click', () => {
     renderDatabases();
 
     if (state) {
-        document.getElementById('inbound_ip').value       = state.inbound_ip       ?? '0.0.0.0';
-        document.getElementById('inbound_port').value     = state.inbound_port     ?? '10808';
-        document.getElementById('vless_link').value       = state.vless_link       ?? '';
+        document.getElementById('inbound_ip').value         = state.inbound_ip       ?? '0.0.0.0';
+        document.getElementById('inbound_port').value       = state.inbound_port     ?? '10808';
+        document.getElementById('vless_link').value         = state.vless_link       ?? '';
         document.getElementById('block_bittorrent').checked = state.block_bittorrent ?? false;
+        autoResize(vlessTextarea);
 
         rulesContainer.innerHTML = '';
         const rules = Array.isArray(state.rules) && state.rules.length ? state.rules : DEFAULT_RULES;
