@@ -4,6 +4,13 @@
 
 # Changelog
 
+## v1.0.2 — 2026-03-20
+
+### UI
+- Password field reveal button now uses SVG icons (open / crossed-out eye) that toggle on click
+
+---
+
 ## v1.0.1 — 2026-03-20
 
 ### UI
