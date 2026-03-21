@@ -382,33 +382,47 @@ button.secondary:hover {
     color: #fff;
 }
 
-#add-rule-btn,
-#add-dns-btn {
+#add-rule-btn {
     align-self: flex-end;
 }
 
-/* DNS rows */
+/* DNS */
 
-.dns-row {
+.dns-subsection-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    padding-left: 1px;
+    margin-top: 4px;
+}
+
+.dns-server-row {
     display: flex;
     gap: 8px;
-    align-items: flex-start;
+    align-items: center;
 }
 
-.dns-addr-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+.dns-server-row .dns-preset {
     flex: 1;
-    min-width: 180px;
 }
 
-.dns-db {
-    flex: 0 0 auto;
+.dns-server-row .dns-custom {
+    flex: 1;
 }
 
-.dns-custom {
-    width: 100%;
+.dns-rule-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.dns-server-select {
+    flex: 0 0 160px;
+}
+
+#add-dns-server-btn,
+#add-dns-rule-btn {
+    align-self: flex-end;
 }
 
 #routing-rules {

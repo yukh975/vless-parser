@@ -144,15 +144,38 @@
                     <span class="toggle-label" data-i18n="dns_enabled_label"></span>
                 </label>
                 <div id="dns-fields" class="auth-fields hidden">
-                    <div id="dns-rules">
+
+                    <!-- DNS servers -->
+                    <div class="dns-subsection-label" data-i18n="dns_servers_label"></div>
+                    <div id="dns-servers-list">
                         <!-- populated by JS -->
                     </div>
-                    <button type="button" id="add-dns-btn" class="add-btn" data-i18n="add_dns_btn"></button>
-                    <div class="field-group" style="margin-top:4px">
-                        <label for="dns_fallback" data-i18n="dns_fallback_label"></label>
-                        <input type="text" id="dns_fallback" name="dns_fallback" placeholder="8.8.8.8">
+                    <button type="button" id="add-dns-server-btn" class="add-btn" data-i18n="add_dns_server_btn"></button>
+
+                    <!-- DNS rules -->
+                    <div class="dns-subsection-label" data-i18n="dns_rules_label"></div>
+                    <div id="dns-rules-list">
+                        <!-- populated by JS -->
+                    </div>
+                    <button type="button" id="add-dns-rule-btn" class="add-btn" data-i18n="add_dns_rule_btn"></button>
+
+                    <!-- Fallback -->
+                    <div class="field-group">
+                        <label for="dns_fallback_preset" data-i18n="dns_fallback_label"></label>
+                        <div class="dns-server-row">
+                            <select id="dns_fallback_preset">
+                                <option value="8.8.8.8">8.8.8.8 (Google)</option>
+                                <option value="8.8.4.4">8.8.4.4 (Google)</option>
+                                <option value="1.1.1.1">1.1.1.1 (Cloudflare)</option>
+                                <option value="1.0.0.1">1.0.0.1 (Cloudflare)</option>
+                                <option value="9.9.9.9">9.9.9.9 (Quad9)</option>
+                                <option value="custom" data-i18n="dns_preset_custom"></option>
+                            </select>
+                            <input type="text" id="dns_fallback_custom" class="dns-custom hidden" placeholder="8.8.8.8">
+                        </div>
                         <span class="hint" data-i18n="dns_fallback_hint"></span>
                     </div>
+
                 </div>
             </div>
 

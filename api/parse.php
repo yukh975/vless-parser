@@ -31,7 +31,8 @@ $domainStrategy  = in_array($in['domain_strategy'] ?? '', ['IPIfNonMatch', 'IPOn
 $routingRules    = is_array($in['routing_rules'] ?? null) ? $in['routing_rules'] : [];
 $dnsEnabled      = (bool)($in['dns_enabled']  ?? false);
 $dnsFallback     = trim((string)($in['dns_fallback'] ?? ''));
-$dnsRules        = is_array($in['dns_rules']  ?? null) ? $in['dns_rules'] : [];
+$dnsServers      = is_array($in['dns_servers'] ?? null) ? $in['dns_servers'] : [];
+$dnsRules        = is_array($in['dns_rules']   ?? null) ? $in['dns_rules']   : [];
 $logEnabled      = (bool)($in['log_enabled'] ?? false);
 $logDir          = trim((string)($in['log_dir'] ?? ''));
 $logLevel        = in_array($in['log_level'] ?? '', ['debug', 'info', 'warning', 'error', 'none'], true)
@@ -50,7 +51,7 @@ if (!str_starts_with($vlessLink, 'vless://')) {
 // --- Parse & build ---------------------------------------------------------
 
 $parsed = parseVless($vlessLink);
-$config = buildConfig($inboundIp, $inboundPort, $parsed, $routingRules, $blockBittorrent, $socks5Auth, $socks5User, $socks5Pass, $defaultOutbound, $domainStrategy, $logEnabled, $logDir, $logLevel, $dnsEnabled, $dnsFallback, $dnsRules);
+$config = buildConfig($inboundIp, $inboundPort, $parsed, $routingRules, $blockBittorrent, $socks5Auth, $socks5User, $socks5Pass, $defaultOutbound, $domainStrategy, $logEnabled, $logDir, $logLevel, $dnsEnabled, $dnsFallback, $dnsServers, $dnsRules);
 
 echo json_encode($config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
@@ -148,7 +149,7 @@ function parseSecurity(string $security, array $q, string $remoteHost): array
 
 // ---------------------------------------------------------------------------
 
-function buildConfig(string $ip, int $port, array $v, array $routingRules, bool $blockBittorrent = false, bool $socks5Auth = false, string $socks5User = '', string $socks5Pass = '', string $defaultOutbound = 'proxy', string $domainStrategy = 'IPIfNonMatch', bool $logEnabled = false, string $logDir = '', string $logLevel = 'warning', bool $dnsEnabled = false, string $dnsFallback = '', array $dnsRules = []): array
+function buildConfig(string $ip, int $port, array $v, array $routingRules, bool $blockBittorrent = false, bool $socks5Auth = false, string $socks5User = '', string $socks5Pass = '', string $defaultOutbound = 'proxy', string $domainStrategy = 'IPIfNonMatch', bool $logEnabled = false, string $logDir = '', string $logLevel = 'warning', bool $dnsEnabled = false, string $dnsFallback = '', array $dnsServers = [], array $dnsRules = []): array
 {
     $destOverride = ['http', 'tls'];
     if ($blockBittorrent) {
@@ -222,7 +223,7 @@ function buildConfig(string $ip, int $port, array $v, array $routingRules, bool 
     }
 
     if ($dnsEnabled) {
-        $dns = buildDns($dnsRules, $dnsFallback);
+        $dns = buildDns($dnsServers, $dnsRules, $dnsFallback);
         if ($dns !== null) {
             $config['dns'] = $dns;
         }
@@ -405,7 +406,7 @@ function formatGeoValue(string $value, string $prefix, string $db): string
     return 'ext:' . $db . ':' . $value;
 }
 
-function buildDns(array $rules, string $fallback): ?array
+function buildDns(array $serverDefs, array $rules, string $fallback): ?array
 {
     $presets = [
         'google_doh'     => 'https://dns.google/dns-query',
@@ -413,25 +414,40 @@ function buildDns(array $rules, string $fallback): ?array
         'yandex_doh'     => 'https://dns.yandex.com/dns-query',
     ];
 
-    $servers = [];
+    // Build ordered list of server addresses
+    $addresses = [];
+    foreach ($serverDefs as $s) {
+        $preset  = $s['preset'] ?? 'google_doh';
+        $address = $presets[$preset] ?? trim((string)($s['custom'] ?? ''));
+        $addresses[] = $address; // keep empty slots to preserve index alignment
+    }
+
+    // Group domain sets per server index
+    $domainsByServer = array_fill(0, count($addresses), []);
 
     foreach ($rules as $rule) {
-        $preset  = $rule['preset'] ?? 'google_doh';
-        $address = $presets[$preset] ?? trim((string)($rule['custom'] ?? ''));
-        if ($address === '') continue;
+        $idx = (int)($rule['server_idx'] ?? 0);
+        if (!isset($addresses[$idx])) continue;
 
-        $db     = trim((string)($rule['db'] ?? ''));
+        $db = trim((string)($rule['db'] ?? ''));
         if ($db !== '' && !preg_match('/^[a-zA-Z0-9_\-]+\.dat$/', $db)) continue;
 
         $values  = is_array($rule['values'] ?? null) ? $rule['values'] : [];
-        $isGeoip = str_starts_with($db, 'geoip');
-        $prefix  = $isGeoip ? 'geoip' : 'geosite';
+        $prefix  = str_starts_with($db, 'geoip') ? 'geoip' : 'geosite';
 
         $domains = array_values(array_filter(array_map(
             fn($v) => formatGeoValue(trim((string)$v), $prefix, $db),
             $values
         )));
 
+        $domainsByServer[$idx] = array_merge($domainsByServer[$idx], $domains);
+    }
+
+    // Assemble final servers array
+    $servers = [];
+    foreach ($addresses as $i => $address) {
+        if ($address === '') continue;
+        $domains = $domainsByServer[$i];
         if (!empty($domains)) {
             $servers[] = ['address' => $address, 'domains' => $domains];
         } else {
