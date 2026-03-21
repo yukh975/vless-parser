@@ -143,13 +143,19 @@ body {
 
 /* Presets dropdown */
 
+.routing-btns {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
 .preset-wrap {
     position: relative;
 }
 
 .preset-dropdown {
     position: absolute;
-    bottom: calc(100% + 6px);
+    top: calc(100% + 6px);
     left: 0;
     z-index: 100;
     background: var(--surface);

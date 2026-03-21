@@ -146,7 +146,13 @@
                     <div id="routing-rules">
                         <!-- populated by JS -->
                     </div>
-                    <button type="button" id="add-rule-btn" class="add-btn" data-i18n="add_rule_btn"></button>
+                    <div class="routing-btns">
+                        <div class="preset-wrap">
+                            <button type="button" id="preset-btn" class="add-btn" data-i18n="preset_btn"></button>
+                            <div id="preset-dropdown" class="preset-dropdown hidden"></div>
+                        </div>
+                        <button type="button" id="add-rule-btn" class="add-btn" data-i18n="add_rule_btn"></button>
+                    </div>
                 </div>
             </div>
 
@@ -245,10 +251,6 @@
             </div>
 
             <div class="actions">
-                <div class="preset-wrap">
-                    <button type="button" id="preset-btn" class="secondary" data-i18n="preset_btn"></button>
-                    <div id="preset-dropdown" class="preset-dropdown hidden"></div>
-                </div>
                 <button type="submit" id="submit-btn">
                     <span class="btn-text" data-i18n="submit_btn"></span>
                 </button>
