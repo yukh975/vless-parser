@@ -2,9 +2,9 @@
 
 ---
 
-# VLESS → xray-core config generator v1.0.1
+# Xray config generator v1.0.2
 
-[![Version](https://img.shields.io/badge/release-v1.0.1-blue)](https://github.com/yukh975/vless-parser/releases)
+[![Version](https://img.shields.io/badge/release-v1.0.2-blue)](https://github.com/yukh975/xray-confgen/releases)
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777bb4)](https://www.php.net)
 [![Nginx](https://img.shields.io/badge/web-Nginx%20%2B%20PHP--FPM-009639)](https://nginx.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE.md)
@@ -49,14 +49,14 @@ Paste a VLESS link, configure the SOCKS5 inbound parameters and routing rules �
 ## Installation
 
 ```bash
-git clone https://github.com/yukh975/vless-parser.git
-cd vless-parser
+git clone https://github.com/yukh975/xray-confgen.git
+cd xray-confgen
 ```
 
 The `db/` directory with geo database files is included in the repository:
 
 ```
-vless-parser/
+xray-confgen/
 └── db/
     ├── geosite.dat
     ├── geoip.dat
@@ -76,7 +76,7 @@ server {
     ssl_certificate     /path/to/ssl/certificate.crt;
     ssl_certificate_key /path/to/ssl/certificate.key;
 
-    root  /path/to/vless-parser;
+    root  /path/to/xray-confgen;
     index index.html;
 
     location /api/ {
@@ -94,7 +94,7 @@ If your `db/` path differs — update the `GEO_DIR` constant in `api/tags.php` a
 ## Project structure
 
 ```
-vless-parser/
+xray-confgen/
 ├── index.html              # Web interface
 ├── assets/
 │   ├── app.js              # Frontend logic

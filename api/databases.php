@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 
 // Path to the directory containing .dat files.
 // Adjust to match your server installation.
-const GEO_DIR = '/home/web/ip/www/vless-parser/db';
+const GEO_DIR = '/home/web/ip/www/xray-confgen/db';
 
 $files = [];
 
