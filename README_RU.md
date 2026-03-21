@@ -2,6 +2,8 @@
 
 ---
 
+<img src="assets/logo.svg" width="48" height="48" align="left" style="margin-right: 14px">
+
 # Xray config generator v1.0.3
 
 [![Version](https://img.shields.io/badge/release-v1.0.3-blue)](https://github.com/yukh975/xray-confgen/releases)
