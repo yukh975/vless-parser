@@ -6,6 +6,14 @@
 
 ## v1.0.3 — unreleased
 
+### UI
+- Dark/light theme toggle button (sun/moon icon) in the header; dark theme is the default
+- Theme preference is saved to `localStorage` and restored on page load without flash
+- Routing presets button opens a dropdown with ready-made rule sets: Russia, Iran, Block ads, All through proxy
+- Preset rules are filtered to only use databases available on the server
+- Share button encodes the full form state into a URL-safe base64 parameter (`?s=…`); the link can be opened on any device to restore the exact configuration
+- Shared URL is cleaned from the address bar after state is restored
+
 ---
 
 ## v1.0.2 — 2026-03-21
