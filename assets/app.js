@@ -634,9 +634,13 @@ clearBtn.addEventListener('click', () => {
 //  Result helpers
 // ============================================================
 
+document.getElementById('error-close').addEventListener('click', () => {
+    errorBox.classList.add('hidden');
+});
+
 function showError(msg) {
-    errorBox.classList.remove('hidden');
     errorText.textContent = msg;
+    errorBox.classList.remove('hidden');
     resultBox.classList.add('hidden');
 }
 
