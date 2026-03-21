@@ -26,6 +26,8 @@
 - DNS rule server selector displayed literal translation key instead of server label
 - Value picker in DNS rule rows always used the initial database instead of the current selection
 - Picker dropdown was clipped by the Logging section below (`overflow: hidden` → `overflow: visible`)
+- Result config modal now closes only via the ✕ button; backdrop click and Escape do not close it
+- Escape key closes the Help and error modals
 
 ---
 
