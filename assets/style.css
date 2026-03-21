@@ -1193,22 +1193,22 @@ pre#result-json {
     .rule-row > *:nth-child(3) { grid-column: 2;    grid-row: 1; }
     .rule-row > *:nth-child(4) { grid-column: 3;    grid-row: 1; }
 
-    /* DNS rule rows: reflow into 2 rows
-       Row 1: [db select] [server select] [remove]
-       Row 2: [value picker — full width]           */
+    /* DNS rule rows: one field per line
+       Row 1: [db select (1fr)] [remove (32px)]
+       Row 2: [value picker — full width]
+       Row 3: [server select — full width]          */
     .dns-rule-row {
-        grid-template-columns: 1fr 1fr 32px;
-        grid-template-rows: auto auto;
+        grid-template-columns: 1fr 32px;
+        grid-template-rows: auto auto auto;
     }
 
     .dns-rule-row > *:nth-child(1) { grid-column: 1;    grid-row: 1; }
     .dns-rule-row > *:nth-child(2) { grid-column: 1/-1; grid-row: 2; }
-    .dns-rule-row > *:nth-child(3) { grid-column: 2;    grid-row: 1; }
-    .dns-rule-row > *:nth-child(4) { grid-column: 3;    grid-row: 1; }
+    .dns-rule-row > *:nth-child(3) { grid-column: 1/-1; grid-row: 3; }
+    .dns-rule-row > *:nth-child(4) { grid-column: 2;    grid-row: 1; }
 
-    /* Compact padding on rule selects so long db names (geosite_RU.dat) fit */
-    .rule-row select,
-    .dns-rule-row select {
+    /* Compact padding on routing rule selects so long db names fit */
+    .rule-row select {
         padding-left: 6px;
         padding-right: 22px;
         background-position: right 5px center;
