@@ -144,6 +144,19 @@ body {
     flex: 1;
 }
 
+.help-body p {
+    margin-bottom: 12px;
+}
+
+.help-body p:last-child {
+    margin-bottom: 0;
+}
+
+.help-body strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
 /* Copyright footer */
 
 .copyright {
