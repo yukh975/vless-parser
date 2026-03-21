@@ -116,15 +116,13 @@ echo json_encode($config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON
 
 // ---------------------------------------------------------------------------
 
-const RESERVED_TAGS = ['direct', 'block', 'balancer'];
-
 function makeOutboundTag(string $name, int $index): string
 {
     $name = trim($name);
     if ($name === '') {
         return $index === 0 ? 'proxy' : 'proxy' . ($index + 1);
     }
-    if (in_array(strtolower($name), RESERVED_TAGS, true)) {
+    if (in_array(strtolower($name), ['direct', 'block', 'balancer'], true)) {
         err("The tag name \"$name\" is reserved (direct, block, balancer). Use a different name or leave it blank.");
     }
     return $name;
