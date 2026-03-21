@@ -56,6 +56,7 @@ const DEFAULT_DATABASES = ['geosite.dat', 'geoip.dat']; // fallback if server un
 const DNS_PRESETS = {
     google_doh:     'https://dns.google/dns-query',
     cloudflare_doh: 'https://cloudflare-dns.com/dns-query',
+    yandex_doh:     'https://dns.yandex.com/dns-query',
 };
 
 const DEFAULT_RULES = [
@@ -543,6 +544,7 @@ function createDnsRow({ preset = 'google_doh', custom = '', db = 'geosite.dat', 
     [
         ['google_doh',     t('dns_preset_google')],
         ['cloudflare_doh', t('dns_preset_cloudflare')],
+        ['yandex_doh',     t('dns_preset_yandex')],
         ['custom',         t('dns_preset_custom')],
     ].forEach(([val, label]) => {
         const opt = document.createElement('option');

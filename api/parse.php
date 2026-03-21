@@ -410,6 +410,7 @@ function buildDns(array $rules, string $fallback): ?array
     $presets = [
         'google_doh'     => 'https://dns.google/dns-query',
         'cloudflare_doh' => 'https://cloudflare-dns.com/dns-query',
+        'yandex_doh'     => 'https://dns.yandex.com/dns-query',
     ];
 
     $servers = [];
