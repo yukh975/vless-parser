@@ -31,8 +31,8 @@ $domainStrategy  = in_array($in['domain_strategy'] ?? '', ['IPIfNonMatch', 'IPOn
     ? $in['domain_strategy'] : 'IPIfNonMatch';
 $routingRules    = is_array($in['routing_rules'] ?? null) ? $in['routing_rules'] : [];
 $dnsEnabled      = (bool)($in['dns_enabled']  ?? false);
-$dnsQueryStrategy = in_array($in['dns_query_strategy'] ?? '', ['UseIP', 'UseIPv4', 'UseIPv6'], true)
-    ? $in['dns_query_strategy'] : 'UseIP';
+$dnsQueryStrategy = in_array($in['dns_query_strategy'] ?? '', ['UseIP', 'UseIPv4', 'UseIPv6', 'useSystem'], true)
+    ? $in['dns_query_strategy'] : 'UseIPv4';
 $dnsFallback     = trim((string)($in['dns_fallback'] ?? ''));
 $dnsServers      = is_array($in['dns_servers'] ?? null) ? $in['dns_servers'] : [];
 $dnsRules        = is_array($in['dns_rules']   ?? null) ? $in['dns_rules']   : [];
@@ -470,7 +470,7 @@ function buildDns(array $serverDefs, array $rules, string $fallback, string $que
     if (empty($servers)) return null;
 
     $result = ['servers' => $servers];
-    if ($queryStrategy !== 'UseIP') {
+    if ($queryStrategy !== 'UseIPv4') {
         $result['queryStrategy'] = $queryStrategy;
     }
 

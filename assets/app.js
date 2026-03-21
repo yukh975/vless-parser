@@ -780,7 +780,7 @@ addDnsRuleBtn.addEventListener('click', () => {
         document.getElementById('default_outbound').value    = state.default_outbound ?? 'proxy';
         document.getElementById('domain_strategy').value     = state.domain_strategy  ?? 'IPIfNonMatch';
         document.getElementById('dns_enabled').checked = state.dns_enabled  ?? false;
-        document.getElementById('dns_query_strategy').value  = state.dns_query_strategy ?? 'UseIP';
+        document.getElementById('dns_query_strategy').value  = state.dns_query_strategy ?? 'UseIPv4';
         dnsFallbackPreset.value = state.dns_fallback_preset ?? '8.8.8.8';
         dnsFallbackCustom.value = state.dns_fallback_custom ?? '';
         dnsFallbackCustom.classList.toggle('hidden', dnsFallbackPreset.value !== 'custom');
@@ -885,7 +885,7 @@ clearBtn.addEventListener('click', () => {
     document.getElementById('default_outbound').value   = 'proxy';
     document.getElementById('domain_strategy').value    = 'IPIfNonMatch';
     document.getElementById('dns_enabled').checked = false;
-    document.getElementById('dns_query_strategy').value = 'UseIP';
+    document.getElementById('dns_query_strategy').value = 'UseIPv4';
     dnsFallbackPreset.value = '8.8.8.8';
     dnsFallbackCustom.value = '';
     dnsFallbackCustom.classList.add('hidden');
