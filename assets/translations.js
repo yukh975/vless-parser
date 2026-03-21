@@ -124,10 +124,11 @@ const TRANSLATIONS = {
 </ul>
 <p>Presets add rules without replacing existing ones. Duplicate rules are skipped. Unchecking a preset removes only the rules it added. Use <em>Clear rules</em> to reset everything at once.</p>
 
-<p><strong>Default outbound</strong> is the action applied to traffic that does not match any rule:</p>
+<p><strong>Default outbound</strong> is the action applied to traffic that does not match any rule. The dropdown lists your VLESS server tags (e.g. <code>proxy</code>, <code>proxy2</code>, …), <code>direct</code>, and — if the Balancer is enabled — <code>balancer</code>:</p>
 <ul>
-  <li><code>proxy</code> — send unmatched traffic through the VLESS tunnel (recommended when you want most traffic proxied).</li>
+  <li>A <strong>VLESS tag</strong> — send unmatched traffic through that specific server.</li>
   <li><code>direct</code> — send unmatched traffic directly without the tunnel (recommended when you only want specific traffic proxied).</li>
+  <li><code>balancer</code> — distribute unmatched traffic across all servers according to the balancer strategy (available only when the Balancer section is enabled).</li>
 </ul>
 
 <p><strong>Domain strategy</strong> controls how xray-core resolves domain names before applying routing rules:</p>
@@ -141,9 +142,9 @@ const TRANSLATIONS = {
 <ul>
   <li><strong>Database</strong> — the geo database to match against (<code>geosite.dat</code> for domains and categories, <code>geoip.dat</code> for IP addresses and subnets). Custom databases from the Databases section are also available.</li>
   <li><strong>Tags</strong> — one or more categories from the selected database (e.g. <code>ru</code>, <code>private</code>, <code>category-ads-all</code>). Click the field to open the picker, search by name, or type a custom value.</li>
-  <li><strong>Action</strong> — what to do with matching traffic: <code>proxy</code>, <code>direct</code>, or <code>block</code>.</li>
+  <li><strong>Action</strong> — what to do with matching traffic: a VLESS server tag (e.g. <code>proxy</code>, <code>proxy2</code>), <code>direct</code>, <code>block</code>, or <code>balancer</code> (when the Balancer is enabled).</li>
 </ul>
-<p>A typical setup: apply the <em>Russia</em> preset and set the default outbound to <code>proxy</code>.</p>
+<p>A typical setup: apply the <em>Russia</em> preset and set the default outbound to the first VLESS server tag (<code>proxy</code>).</p>
 
 <h3>DNS</h3>
 <p>This section lets you configure a custom DNS resolver for xray-core. When disabled, the system DNS is used. Configuring DNS is recommended to avoid leaks and to direct different domains to different resolvers.</p>
@@ -372,10 +373,11 @@ const TRANSLATIONS = {
 </ul>
 <p>Пресеты добавляют правила, не удаляя существующие. Дубликаты пропускаются. При отключении пресета удаляются только добавленные им правила. Кнопка <em>Очистить правила</em> сбрасывает всё сразу.</p>
 
-<p><strong>Маршрут по умолчанию</strong> — действие для трафика, который не попал ни под одно правило:</p>
+<p><strong>Маршрут по умолчанию</strong> — действие для трафика, который не попал ни под одно правило. В выпадающем списке отображаются теги VLESS-серверов (например, <code>proxy</code>, <code>proxy2</code>, …), <code>direct</code>, и — если включён Balancer — <code>balancer</code>:</p>
 <ul>
-  <li><code>proxy</code> — пустить несовпавший трафик через VLESS-туннель (рекомендуется, если большинство трафика должно проксироваться).</li>
+  <li><strong>Тег VLESS-сервера</strong> — пустить несовпавший трафик через этот конкретный сервер.</li>
   <li><code>direct</code> — пустить несовпавший трафик напрямую без туннеля (рекомендуется, если через прокси нужен только отдельный трафик).</li>
+  <li><code>balancer</code> — распределять несовпавший трафик по всем серверам в соответствии со стратегией балансировщика (доступно только при включённом разделе Balancer).</li>
 </ul>
 
 <p><strong>Стратегия доменов</strong> определяет, как xray-core обрабатывает доменные имена перед применением правил маршрутизации:</p>
@@ -389,9 +391,9 @@ const TRANSLATIONS = {
 <ul>
   <li><strong>База данных</strong> — геобаза для сопоставления (<code>geosite.dat</code> — домены и категории, <code>geoip.dat</code> — IP-адреса и подсети). Доступны также кастомные базы из раздела Databases.</li>
   <li><strong>Теги</strong> — одна или несколько категорий из выбранной базы (например, <code>ru</code>, <code>private</code>, <code>category-ads-all</code>). Нажмите на поле, чтобы открыть список, воспользуйтесь поиском или введите своё значение.</li>
-  <li><strong>Действие</strong> — что делать с совпавшим трафиком: <code>proxy</code>, <code>direct</code> или <code>block</code>.</li>
+  <li><strong>Действие</strong> — что делать с совпавшим трафиком: тег VLESS-сервера (например, <code>proxy</code>, <code>proxy2</code>), <code>direct</code>, <code>block</code> или <code>balancer</code> (при включённом Balancer).</li>
 </ul>
-<p>Типичная настройка: применить пресет <em>Россия</em> и установить маршрут по умолчанию <code>proxy</code>.</p>
+<p>Типичная настройка: применить пресет <em>Россия</em> и установить маршрут по умолчанию в тег первого VLESS-сервера (<code>proxy</code>).</p>
 
 <h3>DNS</h3>
 <p>Раздел позволяет настроить собственный DNS-резолвер для xray-core. Если раздел отключён, используется системный DNS. Настройка DNS рекомендуется для предотвращения утечек и для направления разных доменов в разные резолверы.</p>

@@ -10,9 +10,9 @@
 [![Nginx](https://img.shields.io/badge/web-Nginx%20%2B%20PHP--FPM-009639)](https://nginx.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE.md)
 
-**A web tool for generating `config.json` for [xray-core](https://github.com/XTLS/Xray-core) from a VLESS URI.**
+**A web tool for generating `config.json` for [xray-core](https://github.com/XTLS/Xray-core) from one or more VLESS URIs.**
 
-Paste a VLESS URI, configure the SOCKS5 inbound parameters and routing rules — and get a ready-to-use `config.json` to download or copy.
+Add one or more VLESS URIs, configure the SOCKS5 inbound parameters, routing rules, and optionally a load balancer — and get a ready-to-use `config.json` to download or copy.
 
 ---
 
@@ -105,9 +105,10 @@ Routing determines how xray-core handles each connection — whether to send it 
 
 Presets add rules without replacing existing ones. Duplicate rules are skipped. Unchecking a preset removes only the rules it added. Use *Clear rules* to reset everything at once.
 
-**Default outbound** is the action applied to traffic that does not match any rule:
-- `proxy` — send unmatched traffic through the VLESS tunnel (recommended when you want most traffic proxied).
-- `direct` — send unmatched traffic directly without the tunnel (recommended when you only want specific traffic proxied).
+**Default outbound** is the action applied to traffic that does not match any rule. The dropdown lists your VLESS server tags (e.g. `proxy`, `proxy2`, …), `direct`, and — if the Balancer is enabled — `balancer`:
+- A **VLESS tag** — send unmatched traffic through that specific server.
+- `direct` — send unmatched traffic directly without the tunnel.
+- `balancer` — distribute unmatched traffic across all servers (available only when Balancer is enabled).
 
 **Domain strategy** controls how xray-core resolves domain names before applying routing rules:
 - `IPIfNonMatch` — try domain-based rules first; if no rule matches, resolve the domain to an IP and check IP-based rules. Recommended for most setups.
@@ -117,9 +118,9 @@ Presets add rules without replacing existing ones. Duplicate rules are skipped. 
 **Routing rules** are evaluated top to bottom — the first matching rule wins. Each rule consists of:
 - **Database** — the geo database to match against (`geosite.dat` for domains and categories, `geoip.dat` for IP addresses and subnets). Custom databases from the Databases section are also available.
 - **Tags** — one or more categories from the selected database (e.g. `ru`, `private`, `category-ads-all`). Click the field to open the picker, search by name, or type a custom value.
-- **Action** — what to do with matching traffic: `proxy`, `direct`, or `block`.
+- **Action** — what to do with matching traffic: a VLESS server tag (e.g. `proxy`, `proxy2`), `direct`, `block`, or `balancer` (when the Balancer is enabled).
 
-A typical setup: apply the *Russia* preset and set the default outbound to `proxy`.
+A typical setup: apply the *Russia* preset and set the default outbound to the first VLESS server tag (`proxy`).
 
 ### DNS
 
