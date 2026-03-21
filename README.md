@@ -15,6 +15,12 @@ Paste a VLESS link, configure the SOCKS5 inbound parameters and routing rules �
 
 ---
 
+## Demo
+
+Current development version is available at **https://yukh.net/xray-confgen/**
+
+---
+
 ## Usage
 
 For a basic setup, just paste your **VLESS URL** into the corresponding field and click **«Generate config.json»**. That's it — the file is ready to use with xray-core.
