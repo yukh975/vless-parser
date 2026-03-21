@@ -22,7 +22,7 @@ function applyTheme(theme) {
     }
 }
 
-document.getElementById('theme-btn').addEventListener('click', () => {
+document.getElementById('theme-btn')?.addEventListener('click', () => {
     applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
 });
 
