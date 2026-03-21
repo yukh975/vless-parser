@@ -53,6 +53,15 @@ const TRANSLATIONS = {
 <p>For a basic setup, just paste your <strong>VLESS URL</strong> into the corresponding field and click <strong>«Generate config.json»</strong>. That's it — the file is ready to use with xray-core.</p>
 <p>However, we recommend taking a few extra minutes to fine-tune the client configuration. The sections below cover the available options.</p>
 
+<p><strong>How Routing and DNS depend on each other:</strong></p>
+<ul>
+  <li>Without <strong>Routing</strong> — all traffic is sent through the proxy with no filtering. The client cannot distinguish between local, foreign, or unwanted traffic.</li>
+  <li>Without <strong>DNS</strong> — xray-core uses the system DNS resolver. DNS queries are made outside the tunnel and may be visible to your ISP (DNS leak). Routing rules that rely on domain resolution (strategies <code>IPIfNonMatch</code> / <code>IPOnDemand</code>) will use the system resolver, which may produce incorrect results.</li>
+  <li><strong>Routing without DNS</strong> — works, but domain-based routing depends on the system resolver. Risk of DNS leaks.</li>
+  <li><strong>DNS without Routing</strong> — xray-core uses the configured resolvers, but all traffic still goes through the proxy. DNS leak prevention works; traffic splitting does not.</li>
+  <li><strong>Both enabled</strong> — full control: traffic is split by rules, and DNS queries are handled by the configured resolvers. This is the recommended setup.</li>
+</ul>
+
 <h3>Inbound</h3>
 <p>The <strong>inbound</strong> is the local SOCKS5 proxy that xray-core opens on your device. Applications (browser, system) connect to it, and xray-core forwards their traffic through the VLESS tunnel.</p>
 <p><strong>IP address</strong> defines which network interface xray-core listens on:</p>
@@ -196,6 +205,15 @@ const TRANSLATIONS = {
         help_content:           `
 <p>Для базовой настройки достаточно вставить <strong>VLESS URL</strong> в соответствующее поле и нажать <strong>«Сгенерировать config.json»</strong>. Файл сразу готов к использованию с xray-core.</p>
 <p>Тем не менее мы рекомендуем уделить несколько минут более тонкой настройке клиента. Доступные параметры описаны ниже.</p>
+
+<p><strong>Как маршрутизация и DNS зависят друг от друга:</strong></p>
+<ul>
+  <li>Без <strong>маршрутизации</strong> — весь трафик уходит через прокси без какой-либо фильтрации. Клиент не различает локальный, иностранный или нежелательный трафик.</li>
+  <li>Без <strong>DNS</strong> — xray-core использует системный DNS-резолвер. DNS-запросы выполняются вне туннеля и могут быть видны провайдеру (утечка DNS). Правила маршрутизации, зависящие от резолвинга доменов (стратегии <code>IPIfNonMatch</code> / <code>IPOnDemand</code>), будут использовать системный резолвер, что может давать некорректные результаты.</li>
+  <li><strong>Маршрутизация без DNS</strong> — работает, но доменная маршрутизация зависит от системного резолвера. Есть риск утечки DNS-запросов.</li>
+  <li><strong>DNS без маршрутизации</strong> — xray-core использует настроенные резолверы, но весь трафик всё равно идёт через прокси. Защита от утечек DNS работает, разделение трафика — нет.</li>
+  <li><strong>Оба включены</strong> — полный контроль: трафик разделяется по правилам, DNS-запросы обрабатываются настроенными резолверами. Это рекомендуемая конфигурация.</li>
+</ul>
 
 <h3>Inbound</h3>
 <p><strong>Inbound</strong> — это локальный SOCKS5-прокси, который xray-core открывает на вашем устройстве. Приложения (браузер, система) подключаются к нему, а xray-core пересылает их трафик через VLESS-туннель.</p>
