@@ -1022,7 +1022,7 @@ function populatePresetDropdown() {
     });
 }
 
-presetBtn.addEventListener('click', (e) => {
+presetBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
     const opening = presetDropdown.classList.contains('hidden');
     if (opening) populatePresetDropdown();
@@ -1085,7 +1085,7 @@ function getShareUrl() {
 
 const shareBtn = document.getElementById('share-btn');
 
-shareBtn.addEventListener('click', () => {
+shareBtn?.addEventListener('click', () => {
     navigator.clipboard.writeText(getShareUrl()).then(() => {
         shareBtn.textContent = t('share_copied');
         setTimeout(() => { shareBtn.textContent = t('share_btn'); }, 2000);
