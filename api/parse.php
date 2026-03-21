@@ -29,6 +29,9 @@ $defaultOutbound = in_array($in['default_outbound'] ?? '', ['proxy', 'direct'], 
 $domainStrategy  = in_array($in['domain_strategy'] ?? '', ['IPIfNonMatch', 'IPOnDemand', 'AsIs'], true)
     ? $in['domain_strategy'] : 'IPIfNonMatch';
 $routingRules    = is_array($in['routing_rules'] ?? null) ? $in['routing_rules'] : [];
+$dnsEnabled      = (bool)($in['dns_enabled']  ?? false);
+$dnsFallback     = trim((string)($in['dns_fallback'] ?? ''));
+$dnsRules        = is_array($in['dns_rules']  ?? null) ? $in['dns_rules'] : [];
 $logEnabled      = (bool)($in['log_enabled'] ?? false);
 $logDir          = trim((string)($in['log_dir'] ?? ''));
 $logLevel        = in_array($in['log_level'] ?? '', ['debug', 'info', 'warning', 'error', 'none'], true)
@@ -47,7 +50,7 @@ if (!str_starts_with($vlessLink, 'vless://')) {
 // --- Parse & build ---------------------------------------------------------
 
 $parsed = parseVless($vlessLink);
-$config = buildConfig($inboundIp, $inboundPort, $parsed, $routingRules, $blockBittorrent, $socks5Auth, $socks5User, $socks5Pass, $defaultOutbound, $domainStrategy, $logEnabled, $logDir, $logLevel);
+$config = buildConfig($inboundIp, $inboundPort, $parsed, $routingRules, $blockBittorrent, $socks5Auth, $socks5User, $socks5Pass, $defaultOutbound, $domainStrategy, $logEnabled, $logDir, $logLevel, $dnsEnabled, $dnsFallback, $dnsRules);
 
 echo json_encode($config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
@@ -145,7 +148,7 @@ function parseSecurity(string $security, array $q, string $remoteHost): array
 
 // ---------------------------------------------------------------------------
 
-function buildConfig(string $ip, int $port, array $v, array $routingRules, bool $blockBittorrent = false, bool $socks5Auth = false, string $socks5User = '', string $socks5Pass = '', string $defaultOutbound = 'proxy', string $domainStrategy = 'IPIfNonMatch', bool $logEnabled = false, string $logDir = '', string $logLevel = 'warning'): array
+function buildConfig(string $ip, int $port, array $v, array $routingRules, bool $blockBittorrent = false, bool $socks5Auth = false, string $socks5User = '', string $socks5Pass = '', string $defaultOutbound = 'proxy', string $domainStrategy = 'IPIfNonMatch', bool $logEnabled = false, string $logDir = '', string $logLevel = 'warning', bool $dnsEnabled = false, string $dnsFallback = '', array $dnsRules = []): array
 {
     $destOverride = ['http', 'tls'];
     if ($blockBittorrent) {
@@ -216,6 +219,13 @@ function buildConfig(string $ip, int $port, array $v, array $routingRules, bool 
     $routing = buildRouting($routingRules, $blockBittorrent, $defaultOutbound, $domainStrategy);
     if ($routing !== null) {
         $config['routing'] = $routing;
+    }
+
+    if ($dnsEnabled) {
+        $dns = buildDns($dnsRules, $dnsFallback);
+        if ($dns !== null) {
+            $config['dns'] = $dns;
+        }
     }
 
     return $config;
@@ -393,6 +403,48 @@ function formatGeoValue(string $value, string $prefix, string $db): string
     }
 
     return 'ext:' . $db . ':' . $value;
+}
+
+function buildDns(array $rules, string $fallback): ?array
+{
+    $presets = [
+        'google_doh'     => 'https://dns.google/dns-query',
+        'cloudflare_doh' => 'https://cloudflare-dns.com/dns-query',
+    ];
+
+    $servers = [];
+
+    foreach ($rules as $rule) {
+        $preset  = $rule['preset'] ?? 'google_doh';
+        $address = $presets[$preset] ?? trim((string)($rule['custom'] ?? ''));
+        if ($address === '') continue;
+
+        $db     = trim((string)($rule['db'] ?? ''));
+        if ($db !== '' && !preg_match('/^[a-zA-Z0-9_\-]+\.dat$/', $db)) continue;
+
+        $values  = is_array($rule['values'] ?? null) ? $rule['values'] : [];
+        $isGeoip = str_starts_with($db, 'geoip');
+        $prefix  = $isGeoip ? 'geoip' : 'geosite';
+
+        $domains = array_values(array_filter(array_map(
+            fn($v) => formatGeoValue(trim((string)$v), $prefix, $db),
+            $values
+        )));
+
+        if (!empty($domains)) {
+            $servers[] = ['address' => $address, 'domains' => $domains];
+        } else {
+            $servers[] = $address;
+        }
+    }
+
+    if ($fallback !== '') {
+        $servers[] = $fallback;
+    }
+
+    if (empty($servers)) return null;
+
+    return ['servers' => $servers];
 }
 
 function isValidUuid(string $uuid): bool

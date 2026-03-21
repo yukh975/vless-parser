@@ -382,8 +382,33 @@ button.secondary:hover {
     color: #fff;
 }
 
-#add-rule-btn {
+#add-rule-btn,
+#add-dns-btn {
     align-self: flex-end;
+}
+
+/* DNS rows */
+
+.dns-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.dns-addr-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 180px;
+}
+
+.dns-db {
+    flex: 0 0 auto;
+}
+
+.dns-custom {
+    width: 100%;
 }
 
 #routing-rules {
@@ -675,30 +700,44 @@ pre#result-json {
 
 /* Error */
 
+.error-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 999;
+    animation: fade-in 0.15s ease;
+}
+
 .error {
     position: fixed;
-    top: 24px;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
     z-index: 1000;
     display: flex;
     align-items: flex-start;
-    gap: 12px;
+    gap: 16px;
     background: #2d1a1a;
     border: 1px solid #6b2a2a;
     border-radius: var(--radius);
-    padding: 14px 18px;
+    padding: 24px 28px;
     color: var(--error);
-    font-size: 14px;
-    max-width: 560px;
-    width: max-content;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
-    animation: toast-in 0.2s ease;
+    font-size: 15px;
+    line-height: 1.5;
+    max-width: 480px;
+    width: calc(100% - 40px);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
+    animation: modal-in 0.18s ease;
 }
 
-@keyframes toast-in {
-    from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
-    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+@keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes modal-in {
+    from { opacity: 0; transform: translate(-50%, -52%); }
+    to   { opacity: 1; transform: translate(-50%, -50%); }
 }
 
 .error-close {
@@ -707,9 +746,9 @@ pre#result-json {
     border: none;
     color: var(--error);
     cursor: pointer;
-    font-size: 14px;
+    font-size: 18px;
     line-height: 1;
-    opacity: 0.7;
+    opacity: 0.6;
     padding: 0;
     margin-left: auto;
 }

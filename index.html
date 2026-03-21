@@ -135,6 +135,27 @@
                 <button type="button" id="add-rule-btn" class="add-btn" data-i18n="add_rule_btn"></button>
             </div>
 
+            <!-- DNS -->
+            <div class="section-title">DNS</div>
+
+            <div class="field-group">
+                <label class="toggle-row">
+                    <input type="checkbox" id="dns_enabled" name="dns_enabled">
+                    <span class="toggle-label" data-i18n="dns_enabled_label"></span>
+                </label>
+                <div id="dns-fields" class="auth-fields hidden">
+                    <div id="dns-rules">
+                        <!-- populated by JS -->
+                    </div>
+                    <button type="button" id="add-dns-btn" class="add-btn" data-i18n="add_dns_btn"></button>
+                    <div class="field-group" style="margin-top:4px">
+                        <label for="dns_fallback" data-i18n="dns_fallback_label"></label>
+                        <input type="text" id="dns_fallback" name="dns_fallback" placeholder="8.8.8.8">
+                        <span class="hint" data-i18n="dns_fallback_hint"></span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Logging -->
             <div class="section-title">Logging</div>
 
@@ -183,6 +204,7 @@
             <pre id="result-json"></pre>
         </div>
 
+        <div id="error-backdrop" class="error-backdrop hidden"></div>
         <div id="error" class="error hidden">
             <span id="error-text"></span>
             <button type="button" id="error-close" class="error-close">✕</button>

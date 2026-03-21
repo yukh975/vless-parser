@@ -37,6 +37,11 @@ function setLang(lang) {
     const rules = collectRules();
     rulesContainer.innerHTML = '';
     rules.forEach(rule => rulesContainer.appendChild(createRuleRow(rule)));
+
+    // Re-render DNS rows
+    const dnsRules = collectDns();
+    dnsContainer.innerHTML = '';
+    dnsRules.forEach(rule => dnsContainer.appendChild(createDnsRow(rule)));
 }
 
 document.getElementById('lang-en').addEventListener('click', () => setLang('en'));
@@ -47,6 +52,11 @@ document.getElementById('lang-ru').addEventListener('click', () => setLang('ru')
 // ============================================================
 
 const DEFAULT_DATABASES = ['geosite.dat', 'geoip.dat']; // fallback if server unavailable
+
+const DNS_PRESETS = {
+    google_doh:     'https://dns.google/dns-query',
+    cloudflare_doh: 'https://cloudflare-dns.com/dns-query',
+};
 
 const DEFAULT_RULES = [
     { db: 'geoip.dat',   values: ['private'],          action: 'direct' },
@@ -67,11 +77,14 @@ const resultPre      = document.getElementById('result-json');
 const copyBtn        = document.getElementById('copy-btn');
 const downloadBtn    = document.getElementById('download-btn');
 const errorBox       = document.getElementById('error');
+const errorBackdrop  = document.getElementById('error-backdrop');
 const errorText      = document.getElementById('error-text');
 
 const dbListEl       = document.getElementById('db-list');
 const rulesContainer = document.getElementById('routing-rules');
 const addRuleBtn     = document.getElementById('add-rule-btn');
+const dnsContainer   = document.getElementById('dns-rules');
+const addDnsBtn      = document.getElementById('add-dns-btn');
 
 // ============================================================
 //  State
@@ -96,6 +109,9 @@ function saveState() {
         block_bittorrent:  document.getElementById('block_bittorrent').checked,
         default_outbound:  document.getElementById('default_outbound').value,
         domain_strategy:   document.getElementById('domain_strategy').value,
+        dns_enabled:       document.getElementById('dns_enabled').checked,
+        dns_fallback:      document.getElementById('dns_fallback').value,
+        dns_rules:         collectDns(),
         log_enabled:       document.getElementById('log_enabled').checked,
         log_dir:           document.getElementById('log_dir').value,
         log_level:         document.getElementById('log_level').value,
@@ -125,6 +141,14 @@ document.getElementById('reveal-pass').addEventListener('click', (e) => {
     const show  = input.type === 'password';
     input.type   = show ? 'text' : 'password';
     btn.innerHTML = show ? EYE_CLOSED : EYE_OPEN;
+});
+
+// Toggle DNS fields visibility
+const dnsEnabledCheckbox = document.getElementById('dns_enabled');
+const dnsFields          = document.getElementById('dns-fields');
+
+dnsEnabledCheckbox.addEventListener('change', () => {
+    dnsFields.classList.toggle('hidden', !dnsEnabledCheckbox.checked);
 });
 
 // Toggle SOCKS5 auth fields visibility
@@ -503,6 +527,84 @@ addRuleBtn.addEventListener('click', () => {
 });
 
 // ============================================================
+//  DNS rows
+// ============================================================
+
+function createDnsRow({ preset = 'google_doh', custom = '', db = 'geosite.dat', values = [] } = {}) {
+    const row = document.createElement('div');
+    row.className = 'dns-row';
+
+    // Address group: preset select + optional custom input
+    const addrGroup = document.createElement('div');
+    addrGroup.className = 'dns-addr-group';
+
+    const presetSelect = document.createElement('select');
+    presetSelect.className = 'dns-preset';
+    [
+        ['google_doh',     t('dns_preset_google')],
+        ['cloudflare_doh', t('dns_preset_cloudflare')],
+        ['custom',         t('dns_preset_custom')],
+    ].forEach(([val, label]) => {
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = label;
+        if (val === preset) opt.selected = true;
+        presetSelect.appendChild(opt);
+    });
+
+    const customInput = document.createElement('input');
+    customInput.type        = 'text';
+    customInput.className   = 'dns-custom';
+    customInput.placeholder = 'https://...';
+    customInput.value       = custom;
+    customInput.classList.toggle('hidden', preset !== 'custom');
+
+    presetSelect.addEventListener('change', () => {
+        customInput.classList.toggle('hidden', presetSelect.value !== 'custom');
+        saveState();
+    });
+
+    addrGroup.appendChild(presetSelect);
+    addrGroup.appendChild(customInput);
+
+    const dbSelect = buildDbSelect(db);
+    dbSelect.className = 'rule-db dns-db';
+
+    const picker = buildValuePicker(db, values);
+    picker.className += ' rule-values';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type      = 'button';
+    removeBtn.className = 'remove-btn';
+    removeBtn.title     = t('remove_title');
+    removeBtn.textContent = '✕';
+
+    dbSelect.addEventListener('change', () => { picker.resetPicker(); saveState(); });
+    removeBtn.addEventListener('click', () => { row.remove(); saveState(); });
+
+    row.appendChild(addrGroup);
+    row.appendChild(dbSelect);
+    row.appendChild(picker);
+    row.appendChild(removeBtn);
+
+    return row;
+}
+
+function collectDns() {
+    return [...dnsContainer.querySelectorAll('.dns-row')].map(row => ({
+        preset: row.querySelector('.dns-preset').value,
+        custom: row.querySelector('.dns-custom').value.trim(),
+        db:     row.querySelector('.rule-db').value,
+        values: row.querySelector('.rule-values')?.getValues?.() ?? [],
+    }));
+}
+
+addDnsBtn.addEventListener('click', () => {
+    dnsContainer.appendChild(createDnsRow());
+    saveState();
+});
+
+// ============================================================
 //  Init
 // ============================================================
 
@@ -538,6 +640,13 @@ addRuleBtn.addEventListener('click', () => {
         document.getElementById('block_bittorrent').checked  = state.block_bittorrent ?? false;
         document.getElementById('default_outbound').value    = state.default_outbound ?? 'proxy';
         document.getElementById('domain_strategy').value     = state.domain_strategy  ?? 'IPIfNonMatch';
+        document.getElementById('dns_enabled').checked       = state.dns_enabled  ?? false;
+        document.getElementById('dns_fallback').value        = state.dns_fallback ?? '';
+        dnsFields.classList.toggle('hidden', !state.dns_enabled);
+        dnsContainer.innerHTML = '';
+        if (Array.isArray(state.dns_rules)) {
+            state.dns_rules.forEach(r => dnsContainer.appendChild(createDnsRow(r)));
+        }
         document.getElementById('log_enabled').checked       = state.log_enabled       ?? false;
         document.getElementById('log_dir').value             = state.log_dir           ?? '';
         document.getElementById('log_level').value           = state.log_level         ?? 'warning';
@@ -585,6 +694,9 @@ form.addEventListener('submit', async (e) => {
                 block_bittorrent:  document.getElementById('block_bittorrent').checked,
                 default_outbound:  document.getElementById('default_outbound').value,
                 domain_strategy:   document.getElementById('domain_strategy').value,
+                dns_enabled:  document.getElementById('dns_enabled').checked,
+                dns_fallback: document.getElementById('dns_fallback').value.trim(),
+                dns_rules:    collectDns(),
                 log_enabled:       document.getElementById('log_enabled').checked,
                 log_dir:           document.getElementById('log_dir').value.trim(),
                 log_level:         document.getElementById('log_level').value,
@@ -621,6 +733,10 @@ clearBtn.addEventListener('click', () => {
     document.getElementById('block_bittorrent').checked = false;
     document.getElementById('default_outbound').value   = 'proxy';
     document.getElementById('domain_strategy').value    = 'IPIfNonMatch';
+    document.getElementById('dns_enabled').checked = false;
+    document.getElementById('dns_fallback').value  = '';
+    dnsFields.classList.add('hidden');
+    dnsContainer.innerHTML = '';
     document.getElementById('log_enabled').checked      = false;
     document.getElementById('log_dir').value            = '';
     document.getElementById('log_level').value          = 'warning';
@@ -634,13 +750,18 @@ clearBtn.addEventListener('click', () => {
 //  Result helpers
 // ============================================================
 
-document.getElementById('error-close').addEventListener('click', () => {
+function closeError() {
     errorBox.classList.add('hidden');
-});
+    errorBackdrop.classList.add('hidden');
+}
+
+document.getElementById('error-close').addEventListener('click', closeError);
+errorBackdrop.addEventListener('click', closeError);
 
 function showError(msg) {
     errorText.textContent = msg;
     errorBox.classList.remove('hidden');
+    errorBackdrop.classList.remove('hidden');
     resultBox.classList.add('hidden');
 }
 
@@ -652,7 +773,7 @@ function showResult(json) {
 
 function hideAll() {
     resultBox.classList.add('hidden');
-    errorBox.classList.add('hidden');
+    closeError();
 }
 
 // ============================================================
