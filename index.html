@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xray config generator</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="assets/style.css">
+    <script>(function(){var t=localStorage.getItem('xray_theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})()</script>
 </head>
 <body>
     <div class="container">
@@ -19,6 +20,8 @@
                 </div>
             </div>
             <div class="lang-switcher">
+                <button type="button" id="theme-btn" class="theme-btn"></button>
+                <span class="lang-sep">|</span>
                 <button type="button" id="help-btn" class="help-btn" data-i18n-title="help_title">?</button>
                 <span class="lang-sep">|</span>
                 <button type="button" id="lang-en" class="lang-btn">EN</button>
@@ -242,10 +245,15 @@
             </div>
 
             <div class="actions">
+                <div class="preset-wrap">
+                    <button type="button" id="preset-btn" class="secondary" data-i18n="preset_btn"></button>
+                    <div id="preset-dropdown" class="preset-dropdown hidden"></div>
+                </div>
                 <button type="submit" id="submit-btn">
                     <span class="btn-text" data-i18n="submit_btn"></span>
                 </button>
                 <button type="button" id="clear-btn" class="secondary" data-i18n="clear_btn"></button>
+                <button type="button" id="share-btn" class="secondary" data-i18n="share_btn"></button>
             </div>
         </form>
 
