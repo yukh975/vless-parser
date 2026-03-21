@@ -11,6 +11,10 @@
 - **Balancer** section added between VLESS and Sniffing: enable toggle, strategy selector (random / leastPing), observatory probe URL and interval (shown only for leastPing)
 - Routing rule action dropdown and **Default outbound** selector are now dynamic: they reflect the current set of VLESS tags (and include a `balancer` option when the balancer is enabled)
 - VLESS name field placeholder shows the auto-generated tag name (proxy, proxy2, …)
+- Labels above the Name and URI fields aligned with their input edges
+- Remove (✕) button vertically aligned with the URI textarea instead of the top of the row
+- **Duplicate VLESS URI detection**: entering the same URI in two rows highlights the duplicate in red and shows an error immediately
+- **URI validation on submit**: each VLESS row must have a non-empty URI starting with `vless://`; invalid rows are highlighted in red and generation is blocked
 
 ### Features
 - **Multiple outbounds**: each VLESS entry becomes a separate outbound in the config; tags are derived from the Name field or auto-assigned (proxy, proxy2, …)
