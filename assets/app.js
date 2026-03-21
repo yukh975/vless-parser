@@ -954,9 +954,15 @@ function closeError() {
 document.getElementById('result-close').addEventListener('click', closeResult);
 document.getElementById('error-close').addEventListener('click', closeError);
 errorBackdrop.addEventListener('click', () => {
-    closeResult();
     closeError();
     closeHelp();
+});
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        closeError();
+        closeHelp();
+    }
 });
 
 function showError(msg) {
