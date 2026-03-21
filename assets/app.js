@@ -1200,13 +1200,27 @@ form.addEventListener('submit', async (e) => {
 
     const ip      = document.getElementById('inbound_ip').value.trim();
     const port    = parseInt(document.getElementById('inbound_port').value, 10);
-    const entries = collectVlessEntries().filter(e => e.uri.trim().startsWith('vless://'));
+    const allEntries = collectVlessEntries();
 
-    if (entries.length === 0) {
+    if (allEntries.length === 0) {
         showError(t('err_vless_prefix'));
         return;
     }
 
+    // Validate each row: not empty, starts with vless://
+    let validationError = false;
+    vlessList.querySelectorAll('.vless-uri').forEach(ta => {
+        const val = ta.value.trim();
+        const bad = val === '' || !val.startsWith('vless://');
+        ta.classList.toggle('input-error', bad);
+        if (bad) validationError = true;
+    });
+    if (validationError) {
+        showError(t('err_vless_prefix'));
+        return;
+    }
+
+    const entries = allEntries;
     const uris = entries.map(e => e.uri.trim());
     const hasDuplicates = uris.some((u, i) => uris.indexOf(u) !== i);
     if (hasDuplicates) {
