@@ -1252,16 +1252,26 @@ pre#result-json {
         flex: 1;
     }
 
-    /* Routing rule rows: reflow into 2 rows
+    /* VLESS rows: grid layout, card style
+       Row 1: [name-group (1fr)] [remove-btn (32px)]
+       Row 2: [uri-group — full width]                */
     .vless-row {
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: 1fr 32px;
+        grid-template-rows: auto auto;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px;
+        gap: 8px;
     }
 
-    .vless-name-group {
-        flex: 0 0 100%;
-    }
+    .vless-row > .vless-name-group { grid-column: 1;    grid-row: 1; }
+    .vless-row > .vless-uri-group  { grid-column: 1/-1; grid-row: 2; }
+    .vless-row > .remove-btn       { grid-column: 2;    grid-row: 1; margin-top: 0; align-self: end; }
 
-       /* Row 1: [db select] [action] [remove]
+    /* Routing rule rows: reflow into 2 rows
+       Row 1: [db select] [action] [remove]
        Row 2: [value picker — full width]          */
     .rule-row {
         grid-template-columns: 1fr 70px 32px;
@@ -1337,6 +1347,7 @@ pre#result-json {
         gap: 10px;
     }
 
+    .vless-row,
     .rule-row,
     .dns-rule-row {
         background: var(--bg);
