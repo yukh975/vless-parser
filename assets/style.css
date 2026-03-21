@@ -83,23 +83,19 @@ body {
 
 .help-btn {
     background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-size: 13px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 12px;
     font-weight: 700;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
+    transition: background 0.15s, color 0.15s;
 }
 
 .help-btn:hover {
-    color: var(--text);
-    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
 }
 
 /* Help modal */
