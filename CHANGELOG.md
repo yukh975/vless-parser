@@ -4,6 +4,21 @@
 
 # Changelog
 
+## v1.0.3 — unreleased
+
+### UI
+- Favicon added: dark background, thin blue X with 8 ray dots (16×32×48 px)
+- SVG logo added to the left of the page title
+- "Source code on GitHub" link added to the footer
+
+### Docs
+- README rewritten: Features section replaced with full usage guide (from the help modal)
+- Demo link added: https://yukh.net/xray-confgen/
+- SVG logo added to README titles
+- Geo database download links added to the Installation section
+
+---
+
 ## v1.0.2 — 2026-03-21
 
 ### UI
