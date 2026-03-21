@@ -1243,6 +1243,21 @@ pre#result-json {
         padding: 10px 8px;
     }
 
+    /* Visually separate individual rules */
+    #routing-rules,
+    #dns-rules-list {
+        gap: 10px;
+    }
+
+    .rule-row,
+    .dns-rule-row {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px;
+        gap: 8px;
+    }
+
     /* Add / clear rule buttons */
     .add-btn {
         padding: 8px 12px;
