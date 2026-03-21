@@ -14,6 +14,9 @@
 - Share button encodes the full form state into a URL-safe base64 parameter (`?s=…`); the link can be opened on any device to restore the exact configuration
 - Shared URL is cleaned from the address bar after state is restored
 
+### Features
+- **Import config.json** button: load an existing `config.json` back into the form — all fields (inbound, VLESS URI, routing rules, DNS, logging) are populated automatically; the configuration can then be adjusted and regenerated
+
 ---
 
 ## v1.0.2 — 2026-03-21

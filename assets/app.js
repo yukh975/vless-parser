@@ -820,6 +820,49 @@ addDnsRuleBtn.addEventListener('click', () => {
 });
 
 // ============================================================
+//  Apply state to form
+// ============================================================
+
+function applyState(state) {
+    document.getElementById('inbound_ip').value          = state.inbound_ip       ?? '0.0.0.0';
+    document.getElementById('inbound_port').value        = state.inbound_port     ?? '10808';
+    document.getElementById('socks5_auth').checked       = state.socks5_auth      ?? false;
+    document.getElementById('socks5_user').value         = state.socks5_user      ?? '';
+    document.getElementById('socks5_pass').value         = state.socks5_pass      ?? '';
+    socks5AuthFields.classList.toggle('hidden', !state.socks5_auth);
+    document.getElementById('vless_link').value          = state.vless_link       ?? '';
+    document.getElementById('routing_enabled').checked   = state.routing_enabled  ?? false;
+    routingFields.classList.toggle('hidden', !state.routing_enabled);
+    document.getElementById('block_bittorrent').checked  = state.block_bittorrent ?? false;
+    document.getElementById('default_outbound').value    = state.default_outbound ?? 'proxy';
+    document.getElementById('domain_strategy').value     = state.domain_strategy  ?? 'IPIfNonMatch';
+    document.getElementById('dns_enabled').checked       = state.dns_enabled      ?? false;
+    document.getElementById('dns_query_strategy').value  = state.dns_query_strategy  ?? 'UseIPv4';
+    document.getElementById('dns_domain_strategy').value = state.dns_domain_strategy ?? 'IPIfNonMatch';
+    dnsFallbackPreset.value = state.dns_fallback_preset ?? '8.8.8.8';
+    dnsFallbackCustom.value = state.dns_fallback_custom ?? '';
+    dnsFallbackCustom.classList.toggle('hidden', dnsFallbackPreset.value !== 'custom');
+    dnsFields.classList.toggle('hidden', !state.dns_enabled);
+    dnsServersEl.innerHTML = '';
+    if (Array.isArray(state.dns_servers)) {
+        state.dns_servers.forEach(s => dnsServersEl.appendChild(createDnsServerRow(s)));
+    }
+    dnsRulesEl.innerHTML = '';
+    if (Array.isArray(state.dns_rules)) {
+        state.dns_rules.forEach(r => dnsRulesEl.appendChild(createDnsRuleRow(r)));
+    }
+    document.getElementById('log_enabled').checked = state.log_enabled ?? false;
+    document.getElementById('log_dir').value        = state.log_dir    ?? '';
+    document.getElementById('log_level').value      = state.log_level  ?? 'warning';
+    logFields.classList.toggle('hidden', !state.log_enabled);
+    autoResize(vlessTextarea);
+
+    rulesContainer.innerHTML = '';
+    const rules = Array.isArray(state.rules) && state.rules.length ? state.rules : DEFAULT_RULES;
+    rules.forEach(rule => rulesContainer.appendChild(createRuleRow(rule)));
+}
+
+// ============================================================
 //  Init
 // ============================================================
 
@@ -858,42 +901,7 @@ addDnsRuleBtn.addEventListener('click', () => {
     renderDatabases();
 
     if (state) {
-        document.getElementById('inbound_ip').value         = state.inbound_ip       ?? '0.0.0.0';
-        document.getElementById('inbound_port').value       = state.inbound_port     ?? '10808';
-        document.getElementById('socks5_auth').checked      = state.socks5_auth      ?? false;
-        document.getElementById('socks5_user').value        = state.socks5_user      ?? '';
-        document.getElementById('socks5_pass').value        = state.socks5_pass      ?? '';
-        socks5AuthFields.classList.toggle('hidden', !state.socks5_auth);
-        document.getElementById('vless_link').value          = state.vless_link       ?? '';
-        document.getElementById('routing_enabled').checked    = state.routing_enabled  ?? false;
-        routingFields.classList.toggle('hidden', !state.routing_enabled);
-        document.getElementById('block_bittorrent').checked  = state.block_bittorrent ?? false;
-        document.getElementById('default_outbound').value    = state.default_outbound ?? 'proxy';
-        document.getElementById('domain_strategy').value     = state.domain_strategy  ?? 'IPIfNonMatch';
-        document.getElementById('dns_enabled').checked = state.dns_enabled  ?? false;
-        document.getElementById('dns_query_strategy').value   = state.dns_query_strategy  ?? 'UseIPv4';
-        document.getElementById('dns_domain_strategy').value   = state.dns_domain_strategy  ?? 'IPIfNonMatch';
-        dnsFallbackPreset.value = state.dns_fallback_preset ?? '8.8.8.8';
-        dnsFallbackCustom.value = state.dns_fallback_custom ?? '';
-        dnsFallbackCustom.classList.toggle('hidden', dnsFallbackPreset.value !== 'custom');
-        dnsFields.classList.toggle('hidden', !state.dns_enabled);
-        dnsServersEl.innerHTML = '';
-        if (Array.isArray(state.dns_servers)) {
-            state.dns_servers.forEach(s => dnsServersEl.appendChild(createDnsServerRow(s)));
-        }
-        dnsRulesEl.innerHTML = '';
-        if (Array.isArray(state.dns_rules)) {
-            state.dns_rules.forEach(r => dnsRulesEl.appendChild(createDnsRuleRow(r)));
-        }
-        document.getElementById('log_enabled').checked       = state.log_enabled       ?? false;
-        document.getElementById('log_dir').value             = state.log_dir           ?? '';
-        document.getElementById('log_level').value           = state.log_level         ?? 'warning';
-        logFields.classList.toggle('hidden', !state.log_enabled);
-        autoResize(vlessTextarea);
-
-        rulesContainer.innerHTML = '';
-        const rules = Array.isArray(state.rules) && state.rules.length ? state.rules : DEFAULT_RULES;
-        rules.forEach(rule => rulesContainer.appendChild(createRuleRow(rule)));
+        applyState(state);
     } else {
         loadDefaultRules();
     }
@@ -1156,6 +1164,264 @@ shareBtn?.addEventListener('click', () => {
         shareBtn.textContent = t('share_copied');
         setTimeout(() => { shareBtn.textContent = t('share_btn'); }, 2000);
     });
+});
+
+// ============================================================
+//  Import config.json
+// ============================================================
+
+function parseConfigJson(config) {
+    const state = {};
+
+    // --- Inbound ---
+    const inbound = config.inbounds?.[0];
+    if (inbound) {
+        state.inbound_ip   = inbound.listen ?? '0.0.0.0';
+        state.inbound_port = String(inbound.port ?? 10808);
+        const auth = inbound.settings?.auth === 'password';
+        state.socks5_auth = auth;
+        state.socks5_user = auth ? (inbound.settings?.accounts?.[0]?.user ?? '') : '';
+        state.socks5_pass = auth ? (inbound.settings?.accounts?.[0]?.pass ?? '') : '';
+    } else {
+        state.inbound_ip   = '0.0.0.0';
+        state.inbound_port = '10808';
+        state.socks5_auth  = false;
+        state.socks5_user  = '';
+        state.socks5_pass  = '';
+    }
+
+    // --- VLESS URI reconstruction ---
+    const vlessOut = (config.outbounds ?? []).find(o => o.protocol === 'vless');
+    if (vlessOut) {
+        const vnext = vlessOut.settings?.vnext?.[0];
+        const user  = vnext?.users?.[0];
+        const ss    = vlessOut.streamSettings ?? {};
+        const name  = vlessOut._comment ?? '';
+
+        if (vnext && user) {
+            const uuid     = user.id;
+            const flow     = user.flow ?? '';
+            const host     = vnext.address;
+            const port     = vnext.port;
+            const network  = ss.network ?? 'tcp';
+            const security = ss.security ?? 'none';
+
+            const params = new URLSearchParams();
+            if (network !== 'tcp')   params.set('type', network);
+            if (security !== 'none') params.set('security', security);
+            if (flow)                params.set('flow', flow);
+
+            if (network === 'ws' && ss.wsSettings) {
+                if (ss.wsSettings.path)            params.set('path', ss.wsSettings.path);
+                if (ss.wsSettings.headers?.Host)   params.set('host', ss.wsSettings.headers.Host);
+            } else if (network === 'xhttp' && ss.xhttpSettings) {
+                if (ss.xhttpSettings.path) params.set('path', ss.xhttpSettings.path);
+                if (ss.xhttpSettings.mode) params.set('mode', ss.xhttpSettings.mode);
+                if (ss.xhttpSettings.host) params.set('host', ss.xhttpSettings.host);
+            } else if (network === 'grpc' && ss.grpcSettings) {
+                if (ss.grpcSettings.serviceName) params.set('serviceName', ss.grpcSettings.serviceName);
+                if (ss.grpcSettings.multiMode)   params.set('mode', 'multi');
+            } else if (network === 'h2' && ss.httpSettings) {
+                if (ss.httpSettings.path) params.set('path', ss.httpSettings.path);
+                const h2Host = Array.isArray(ss.httpSettings.host) ? ss.httpSettings.host[0] : ss.httpSettings.host;
+                if (h2Host) params.set('host', h2Host);
+            }
+
+            if (security === 'tls' && ss.tlsSettings) {
+                if (ss.tlsSettings.serverName) params.set('sni', ss.tlsSettings.serverName);
+                if (ss.tlsSettings.fingerprint) params.set('fp', ss.tlsSettings.fingerprint);
+                if (ss.tlsSettings.alpn?.length) params.set('alpn', ss.tlsSettings.alpn.join(','));
+            } else if (security === 'reality' && ss.realitySettings) {
+                if (ss.realitySettings.serverName)  params.set('sni', ss.realitySettings.serverName);
+                if (ss.realitySettings.fingerprint) params.set('fp',  ss.realitySettings.fingerprint);
+                if (ss.realitySettings.publicKey)   params.set('pbk', ss.realitySettings.publicKey);
+                if (ss.realitySettings.shortId)     params.set('sid', ss.realitySettings.shortId);
+                if (ss.realitySettings.spiderX)     params.set('spx', ss.realitySettings.spiderX);
+            }
+
+            const qs       = params.toString();
+            const fragment = name ? '#' + encodeURIComponent(name) : '';
+            state.vless_link = `vless://${uuid}@${host}:${port}${qs ? '?' + qs : ''}${fragment}`;
+        }
+    }
+    state.vless_link = state.vless_link ?? '';
+
+    // --- Routing ---
+    const routing = config.routing;
+    if (routing) {
+        state.routing_enabled  = true;
+        state.domain_strategy  = routing.domainStrategy ?? 'IPIfNonMatch';
+        state.default_outbound = 'proxy';
+        state.block_bittorrent = false;
+        state.rules = [];
+
+        for (const rule of routing.rules ?? []) {
+            if (rule.network === 'tcp,udp') {
+                state.default_outbound = rule.outboundTag ?? 'proxy';
+                continue;
+            }
+            if (Array.isArray(rule.protocol) && rule.protocol.includes('bittorrent')) {
+                state.block_bittorrent = true;
+                continue;
+            }
+            const action = rule.outboundTag ?? 'proxy';
+            if (rule.domain?.length) {
+                const grouped = {};
+                for (const d of rule.domain) {
+                    let db = 'geosite.dat', tag = d;
+                    if (d.startsWith('geosite:')) {
+                        db = 'geosite.dat'; tag = d.slice(8);
+                    } else if (d.startsWith('ext:')) {
+                        const parts = d.split(':'); db = parts[1]; tag = parts[2];
+                    }
+                    (grouped[db] ??= []).push(tag);
+                }
+                for (const [db, values] of Object.entries(grouped)) {
+                    state.rules.push({ db, values, action });
+                }
+            }
+            if (rule.ip?.length) {
+                const grouped = {};
+                for (const ip of rule.ip) {
+                    if (ip.startsWith('geoip:')) {
+                        (grouped['geoip.dat'] ??= []).push(ip.slice(6));
+                    } else if (ip.startsWith('ext:')) {
+                        const parts = ip.split(':'); (grouped[parts[1]] ??= []).push(parts[2]);
+                    } else {
+                        (grouped['geoip.dat'] ??= []).push(ip);
+                    }
+                }
+                for (const [db, values] of Object.entries(grouped)) {
+                    state.rules.push({ db, values, action });
+                }
+            }
+        }
+    } else {
+        state.routing_enabled  = false;
+        state.domain_strategy  = 'IPIfNonMatch';
+        state.default_outbound = 'proxy';
+        state.block_bittorrent = false;
+        state.rules            = [];
+    }
+
+    // --- DNS ---
+    const dns = config.dns;
+    if (dns) {
+        state.dns_enabled         = true;
+        state.dns_query_strategy  = dns.queryStrategy  ?? 'UseIPv4';
+        state.dns_domain_strategy = dns.domainStrategy ?? 'IPIfNonMatch';
+
+        const DNS_ADDR_TO_PRESET = {
+            'https://8.8.8.8/dns-query':   'google_doh',
+            'https://1.1.1.1/dns-query':   'cloudflare_doh',
+            'https://77.88.8.8/dns-query': 'yandex_doh',
+            '8.8.8.8':                     'google_dns',
+            '1.1.1.1':                     'cloudflare_dns',
+            '77.88.8.8':                   'yandex_dns',
+        };
+
+        const servers        = dns.servers ?? [];
+        const plainStrings   = servers.filter(s => typeof s === 'string');
+        const objectEntries  = servers.filter(s => typeof s === 'object' && s !== null);
+
+        const fallbackAddr     = plainStrings[plainStrings.length - 1] ?? '';
+        const nonFallbackPlain = plainStrings.slice(0, -1);
+
+        const FALLBACK_OPTIONS = ['8.8.8.8', '8.8.4.4', '1.1.1.1', '1.0.0.1', '9.9.9.9'];
+        if (FALLBACK_OPTIONS.includes(fallbackAddr)) {
+            state.dns_fallback_preset = fallbackAddr;
+            state.dns_fallback_custom = '';
+        } else if (fallbackAddr) {
+            state.dns_fallback_preset = 'custom';
+            state.dns_fallback_custom = fallbackAddr;
+        } else {
+            state.dns_fallback_preset = '8.8.8.8';
+            state.dns_fallback_custom = '';
+        }
+
+        state.dns_servers = [];
+        for (const addr of nonFallbackPlain) {
+            const preset = DNS_ADDR_TO_PRESET[addr];
+            state.dns_servers.push(preset ? { preset } : { preset: 'custom', custom: addr, name: '' });
+        }
+        for (const entry of objectEntries) {
+            const addr   = entry.address ?? '';
+            const preset = DNS_ADDR_TO_PRESET[addr];
+            state.dns_servers.push(preset ? { preset } : { preset: 'custom', custom: addr, name: '' });
+        }
+
+        state.dns_rules = [];
+        objectEntries.forEach((entry, idx) => {
+            const serverListIdx = nonFallbackPlain.length + idx;
+            if (!entry.domains?.length) return;
+            const grouped = {};
+            for (const d of entry.domains) {
+                let db = 'geosite.dat', tag = d;
+                if (d.startsWith('geosite:'))      { db = 'geosite.dat'; tag = d.slice(8); }
+                else if (d.startsWith('geoip:'))   { db = 'geoip.dat';   tag = d.slice(6); }
+                else if (d.startsWith('ext:'))     { const p = d.split(':'); db = p[1]; tag = p[2]; }
+                (grouped[db] ??= []).push(tag);
+            }
+            for (const [db, values] of Object.entries(grouped)) {
+                state.dns_rules.push({ db, values, server_idx: serverListIdx });
+            }
+        });
+    } else {
+        state.dns_enabled         = false;
+        state.dns_query_strategy  = 'UseIPv4';
+        state.dns_domain_strategy = 'IPIfNonMatch';
+        state.dns_fallback_preset = '8.8.8.8';
+        state.dns_fallback_custom = '';
+        state.dns_servers         = [];
+        state.dns_rules           = [];
+    }
+
+    // --- Log ---
+    const log      = config.log;
+    const loglevel = log?.loglevel ?? 'none';
+    if (log && loglevel !== 'none') {
+        state.log_enabled = true;
+        state.log_level   = loglevel;
+        if (log.access) {
+            const sep   = Math.max(log.access.lastIndexOf('/'), log.access.lastIndexOf('\\'));
+            state.log_dir = sep >= 0 ? log.access.slice(0, sep) : '';
+        } else {
+            state.log_dir = '';
+        }
+    } else {
+        state.log_enabled = false;
+        state.log_level   = 'warning';
+        state.log_dir     = '';
+    }
+
+    return state;
+}
+
+const importFileInput = document.getElementById('import-file');
+const importBtn       = document.getElementById('import-btn');
+
+importBtn?.addEventListener('click', () => importFileInput?.click());
+
+importFileInput?.addEventListener('change', () => {
+    const file = importFileInput.files?.[0];
+    if (!file) return;
+    importFileInput.value = '';
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const config = JSON.parse(e.target.result);
+            if (typeof config !== 'object' || config === null || !config.inbounds) {
+                throw new Error('not a config');
+            }
+            const state = parseConfigJson(config);
+            applyState(state);
+            saveState();
+        } catch {
+            showError(t('import_error'));
+        }
+    };
+    reader.readAsText(file);
 });
 
 // ============================================================
