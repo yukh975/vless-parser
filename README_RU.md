@@ -4,7 +4,7 @@
 
 <img src="assets/logo.svg" width="48" height="48" align="left" style="margin-right: 14px">
 
-# Xray config generator v1.0.3
+# Xray config generator v1.0.4-devel
 
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777bb4)](https://www.php.net)
 [![Nginx](https://img.shields.io/badge/web-Nginx%20%2B%20PHP--FPM-009639)](https://nginx.org)
