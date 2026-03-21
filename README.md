@@ -37,13 +37,15 @@ However, we recommend taking a few extra minutes to fine-tune the client configu
 
 ### Inbound
 
-The **inbound** is the local SOCKS5 proxy that xray-core opens on your device. Applications (browser, system) connect to it, and xray-core forwards their traffic through the VLESS tunnel.
+The **inbound** defines the local proxy that xray-core opens on your device. Applications (browser, system) connect to it, and xray-core forwards their traffic through the VLESS tunnel.
 
 **IP address** defines which network interface xray-core listens on:
 - `127.0.0.1` — recommended for personal devices (desktops, laptops, phones). Only the device itself can connect to the proxy; it is not accessible from the local network.
 - `0.0.0.0` — listens on all available IP addresses on the device. Other devices on the same network can use this proxy. Use with caution.
 
 **Port** is the local port the SOCKS5 proxy listens on. The default `10808` works in most cases; change it if there is a conflict with another application.
+
+**HTTP inbound** — click *Add HTTP inbound* to add a second local proxy that accepts HTTP CONNECT requests (in addition to the SOCKS5 inbound). This is useful for applications that support HTTP proxy but not SOCKS5. The default address is `127.0.0.1:8080`. Configure IP and port the same way as for SOCKS5. Click ✕ to remove the HTTP inbound.
 
 ### VLESS URL
 
