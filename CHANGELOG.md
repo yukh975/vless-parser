@@ -4,13 +4,23 @@
 
 # Changelog
 
-## v1.0.3 — 2026-03-21
+## v1.0.2 — 2026-03-20
 
 ### UI
+- Password reveal button uses SVG icons (open / crossed-out eye) that toggle on click
+- Named section titles: Inbound, VLESS, Databases, Routing, Logging
+- Uniform vertical spacing between all form sections
+- Field labels simplified: removed redundant "Inbound" from IP and port labels
+- Field labels horizontally aligned with input fields
+- Hint texts simplified
+- Page title and H1 updated: "VLESS URL → xray-core config.json"
 - Routing section is now collapsible (hidden by default); all optional sections collapsed on first load
 - Result `config.json` is displayed in a centered modal popup (same style as error dialog) with backdrop and close button
+- Result config modal closes only via the ✕ button; backdrop click and Escape do not close it
+- Escape key closes the Help and error modals
 - Value picker dropdown: added clear-all ✕ button (shown only when items are selected)
 - DNS, Routing, Logging sections now have a consistent toggle-to-expand pattern
+- Help button (?) added next to language switcher; opens a modal with usage guide and language switcher
 
 ### Features
 - **DNS section** added:
@@ -26,21 +36,6 @@
 - DNS rule server selector displayed literal translation key instead of server label
 - Value picker in DNS rule rows always used the initial database instead of the current selection
 - Picker dropdown was clipped by the Logging section below (`overflow: hidden` → `overflow: visible`)
-- Result config modal now closes only via the ✕ button; backdrop click and Escape do not close it
-- Escape key closes the Help and error modals
-
----
-
-## v1.0.2 — 2026-03-20
-
-### UI
-- Password reveal button uses SVG icons (open / crossed-out eye) that toggle on click
-- Named section titles: Inbound, VLESS, Databases, Routing, Logging
-- Uniform vertical spacing between all form sections
-- Field labels simplified: removed redundant "Inbound" from IP and port labels
-- Field labels horizontally aligned with input fields
-- Hint texts simplified
-- Page title and H1 updated: "VLESS URL → xray-core config.json"
 
 ---
 
