@@ -597,6 +597,12 @@ button.secondary:hover {
     font-weight: 500;
 }
 
+/* Sniffing section */
+
+#sniffing-fields {
+    padding-left: 23px; /* align with toggle label text (15px checkbox + 8px gap) */
+}
+
 /* Sniffing destOverride checkboxes */
 
 .sniffing-checkboxes {
