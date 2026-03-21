@@ -396,6 +396,21 @@ button.secondary:hover {
     margin-top: 4px;
 }
 
+.dns-top-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-top: 10px;
+    margin-bottom: 6px;
+}
+
+.dns-top-right {
+    flex: 0 0 210px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 .dns-server-row,
 .dns-fallback-row {
     display: flex;

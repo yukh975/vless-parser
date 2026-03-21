@@ -121,7 +121,8 @@ function saveState() {
         default_outbound:  document.getElementById('default_outbound').value,
         domain_strategy:   document.getElementById('domain_strategy').value,
         dns_enabled:          document.getElementById('dns_enabled').checked,
-        dns_query_strategy:   document.getElementById('dns_query_strategy').value,
+        dns_query_strategy:    document.getElementById('dns_query_strategy').value,
+        dns_domain_matcher:    document.getElementById('dns_domain_matcher').value,
         dns_fallback_preset:  dnsFallbackPreset.value,
         dns_fallback_custom:  dnsFallbackCustom.value,
         dns_servers:          collectDnsServers(),
@@ -495,7 +496,7 @@ function buildValuePicker(initDb, selectedValues = []) {
         const isOpen = !dropdown.classList.contains('hidden');
         document.querySelectorAll('.value-picker-dropdown').forEach(d => d.classList.add('hidden'));
         if (!isOpen) {
-            const currentDb = wrapper.closest('.rule-row')?.querySelector('.rule-db')?.value ?? initDb;
+            const currentDb = (wrapper.closest('.rule-row') ?? wrapper.closest('.dns-rule-row'))?.querySelector('.rule-db')?.value ?? initDb;
             openDropdown(currentDb);
         }
     });
@@ -780,7 +781,8 @@ addDnsRuleBtn.addEventListener('click', () => {
         document.getElementById('default_outbound').value    = state.default_outbound ?? 'proxy';
         document.getElementById('domain_strategy').value     = state.domain_strategy  ?? 'IPIfNonMatch';
         document.getElementById('dns_enabled').checked = state.dns_enabled  ?? false;
-        document.getElementById('dns_query_strategy').value  = state.dns_query_strategy ?? 'UseIPv4';
+        document.getElementById('dns_query_strategy').value   = state.dns_query_strategy  ?? 'UseIPv4';
+        document.getElementById('dns_domain_matcher').value   = state.dns_domain_matcher  ?? 'hybrid';
         dnsFallbackPreset.value = state.dns_fallback_preset ?? '8.8.8.8';
         dnsFallbackCustom.value = state.dns_fallback_custom ?? '';
         dnsFallbackCustom.classList.toggle('hidden', dnsFallbackPreset.value !== 'custom');
@@ -842,7 +844,8 @@ form.addEventListener('submit', async (e) => {
                 default_outbound:  document.getElementById('default_outbound').value,
                 domain_strategy:   document.getElementById('domain_strategy').value,
                 dns_enabled:          document.getElementById('dns_enabled').checked,
-                dns_query_strategy:   document.getElementById('dns_query_strategy').value,
+                dns_query_strategy:    document.getElementById('dns_query_strategy').value,
+                dns_domain_matcher:    document.getElementById('dns_domain_matcher').value,
                 dns_fallback:         getFallbackValue(),
                 dns_servers:          collectDnsServers(),
                 dns_rules:            collectDnsRules(),
@@ -885,7 +888,8 @@ clearBtn.addEventListener('click', () => {
     document.getElementById('default_outbound').value   = 'proxy';
     document.getElementById('domain_strategy').value    = 'IPIfNonMatch';
     document.getElementById('dns_enabled').checked = false;
-    document.getElementById('dns_query_strategy').value = 'UseIPv4';
+    document.getElementById('dns_query_strategy').value  = 'UseIPv4';
+    document.getElementById('dns_domain_matcher').value  = 'hybrid';
     dnsFallbackPreset.value = '8.8.8.8';
     dnsFallbackCustom.value = '';
     dnsFallbackCustom.classList.add('hidden');

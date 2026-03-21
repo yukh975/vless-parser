@@ -151,8 +151,8 @@
                 </label>
                 <div id="dns-fields" class="auth-fields hidden">
 
-                    <!-- Fallback + Query strategy -->
-                    <div class="field-row" style="margin-top:10px; margin-bottom:6px">
+                    <!-- Fallback + Query strategy + Domain matcher -->
+                    <div class="dns-top-row">
                         <div class="field-group">
                             <label for="dns_fallback_preset" data-i18n="dns_fallback_label"></label>
                             <div class="dns-fallback-row">
@@ -167,14 +167,26 @@
                                 <input type="text" id="dns_fallback_custom" class="dns-custom hidden" placeholder="8.8.8.8">
                             </div>
                         </div>
-                        <div class="field-group field-group--level">
-                            <label for="dns_query_strategy" data-i18n="dns_query_strategy_label"></label>
-                            <select id="dns_query_strategy">
-                                <option value="UseIP">UseIP</option>
-                                <option value="UseIPv4" selected>UseIPv4</option>
-                                <option value="UseIPv6">UseIPv6</option>
-                                <option value="useSystem">useSystem</option>
-                            </select>
+                        <div class="dns-top-right">
+                            <div class="field-group">
+                                <label for="dns_query_strategy" data-i18n="dns_query_strategy_label"></label>
+                                <select id="dns_query_strategy">
+                                    <option value="UseIP">UseIP</option>
+                                    <option value="UseIPv4" selected>UseIPv4</option>
+                                    <option value="UseIPv6">UseIPv6</option>
+                                    <option value="ForceIP">ForceIP</option>
+                                    <option value="ForceIPv4">ForceIPv4</option>
+                                    <option value="ForceIPv6">ForceIPv6</option>
+                                    <option value="useSystem">useSystem</option>
+                                </select>
+                            </div>
+                            <div class="field-group">
+                                <label for="dns_domain_matcher" data-i18n="dns_domain_matcher_label"></label>
+                                <select id="dns_domain_matcher">
+                                    <option value="hybrid" selected>hybrid</option>
+                                    <option value="linear">linear</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
