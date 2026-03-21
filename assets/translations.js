@@ -75,6 +75,30 @@ const TRANSLATIONS = {
 
 <h3>Databases</h3>
 <p>This section lists the geo databases available on the server. They are used when configuring routing rules and DNS rules to match traffic by country, region, or category.</p>
+
+<h3>Routing</h3>
+<p>Routing determines how xray-core handles each connection — whether to send it through the proxy, route it directly, or block it entirely. If the section is disabled, all traffic goes through the proxy without any filtering.</p>
+
+<p><strong>Default outbound</strong> is the action applied to traffic that does not match any rule:</p>
+<ul>
+  <li><code>proxy</code> — send unmatched traffic through the VLESS tunnel (recommended when you want most traffic proxied).</li>
+  <li><code>direct</code> — send unmatched traffic directly without the tunnel (recommended when you only want specific traffic proxied).</li>
+</ul>
+
+<p><strong>Domain strategy</strong> controls how xray-core resolves domain names before applying routing rules:</p>
+<ul>
+  <li><code>IPIfNonMatch</code> — try domain-based rules first; if no rule matches, resolve the domain to an IP and check IP-based rules. Recommended for most setups.</li>
+  <li><code>IPOnDemand</code> — always resolve the domain to an IP before routing. More precise, but causes an extra DNS lookup for every connection.</li>
+  <li><code>AsIs</code> — route by domain name only, never resolve to IP. Fastest, but IP-based rules will not apply to domain traffic.</li>
+</ul>
+
+<p><strong>Routing rules</strong> are evaluated top to bottom — the first matching rule wins. Each rule consists of:</p>
+<ul>
+  <li><strong>Database</strong> — the geo database to match against (<code>geosite.dat</code> for domains and categories, <code>geoip.dat</code> for IP addresses and subnets). Custom databases from the Databases section are also available.</li>
+  <li><strong>Tags</strong> — one or more categories from the selected database (e.g. <code>ru</code>, <code>private</code>, <code>category-ads-all</code>). Click the field to open the picker, search by name, or type a custom value.</li>
+  <li><strong>Action</strong> — what to do with matching traffic: <code>proxy</code>, <code>direct</code>, or <code>block</code>.</li>
+</ul>
+<p>A typical setup: route local and Russian traffic directly, block ads, and proxy everything else. Add rules in that order and set the default outbound to <code>proxy</code>.</p>
 `,
         remove_title:           'Remove',
         err_vless_prefix:       'VLESS URI must start with vless://',
@@ -157,6 +181,30 @@ const TRANSLATIONS = {
 
 <h3>Databases</h3>
 <p>В этом разделе отображается список геобаз данных, доступных на сервере. Они используются при настройке правил маршрутизации и DNS для сопоставления трафика по стране, региону или категории.</p>
+
+<h3>Routing</h3>
+<p>Маршрутизация определяет, как xray-core обрабатывает каждое соединение — отправить через прокси, пустить напрямую или заблокировать. Если раздел отключён, весь трафик идёт через прокси без фильтрации.</p>
+
+<p><strong>Маршрут по умолчанию</strong> — действие для трафика, который не попал ни под одно правило:</p>
+<ul>
+  <li><code>proxy</code> — пустить несовпавший трафик через VLESS-туннель (рекомендуется, если большинство трафика должно проксироваться).</li>
+  <li><code>direct</code> — пустить несовпавший трафик напрямую без туннеля (рекомендуется, если через прокси нужен только отдельный трафик).</li>
+</ul>
+
+<p><strong>Стратегия доменов</strong> определяет, как xray-core обрабатывает доменные имена перед применением правил маршрутизации:</p>
+<ul>
+  <li><code>IPIfNonMatch</code> — сначала проверяются правила по домену; если ни одно не совпало, домен резолвится в IP и проверяются IP-правила. Рекомендуется для большинства случаев.</li>
+  <li><code>IPOnDemand</code> — домен всегда резолвится в IP перед маршрутизацией. Более точно, но требует дополнительного DNS-запроса для каждого соединения.</li>
+  <li><code>AsIs</code> — маршрутизация только по доменному имени, без резолвинга. Быстрее всего, но IP-правила не применяются к доменному трафику.</li>
+</ul>
+
+<p><strong>Правила маршрутизации</strong> проверяются сверху вниз — срабатывает первое совпавшее правило. Каждое правило состоит из:</p>
+<ul>
+  <li><strong>База данных</strong> — геобаза для сопоставления (<code>geosite.dat</code> — домены и категории, <code>geoip.dat</code> — IP-адреса и подсети). Доступны также кастомные базы из раздела Databases.</li>
+  <li><strong>Теги</strong> — одна или несколько категорий из выбранной базы (например, <code>ru</code>, <code>private</code>, <code>category-ads-all</code>). Нажмите на поле, чтобы открыть список, воспользуйтесь поиском или введите своё значение.</li>
+  <li><strong>Действие</strong> — что делать с совпавшим трафиком: <code>proxy</code>, <code>direct</code> или <code>block</code>.</li>
+</ul>
+<p>Типичная настройка: локальный и российский трафик — напрямую, рекламу — блокировать, остальное — через прокси. Добавьте правила в таком порядке и установите маршрут по умолчанию <code>proxy</code>.</p>
 `,
         remove_title:           'Удалить',
         err_vless_prefix:       'VLESS URI должен начинаться с vless://',
